@@ -1,4 +1,8 @@
-Flask==2.3.3
-Flask-CORS==4.0.0
-gunicorn==21.2.0
+flask==2.3.3
+flask-cors==4.0.0
+openpyxl==3.1.2
+requests==2.31.0
+stripe==6.6.0
+paypalrestsdk==1.13.3
+schedule==1.2.0
 
