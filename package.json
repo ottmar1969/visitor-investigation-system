@@ -1,0 +1,14 @@
+{
+  "name": "visitor-investigation-system",
+  "version": "1.0.0",
+  "description": "Web-based visitor investigation system for analyzing website visitors",
+  "main": "app.py",
+  "scripts": {
+    "start": "gunicorn app:app"
+  },
+  "dependencies": {},
+  "engines": {
+    "python": "3.11.x"
+  }
+}
+
