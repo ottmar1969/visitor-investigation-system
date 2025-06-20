@@ -1,2 +1,2 @@
-web: python3 app.py
+web: gunicorn enhanced_app_complete:app
 
