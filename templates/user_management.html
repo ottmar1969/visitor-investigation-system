@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - {{ user.business_name }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; 
+            padding: 20px; 
+        }
+        .container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 15px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+            overflow: hidden; 
+        }
+        .header { 
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%); 
+            color: white; 
+            padding: 30px 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .header h1 { 
+            font-size: 2rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+        }
+        .user-info { 
+            text-align: right; 
+        }
+        .country-badge { 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            background: rgba(255,255,255,0.1); 
+            padding: 5px 12px; 
+            border-radius: 20px; 
+            font-size: 0.9rem; 
+        }
+        .main-content { 
+            padding: 40px; 
+        }
+        .action-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 30px; 
+            padding: 20px; 
+            background: #f8f9fa; 
+            border-radius: 12px; 
+            border: 2px solid #e9ecef; 
+        }
+        .btn { 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            text-decoration: none; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+        .btn-primary { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+        }
+        .btn-primary:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3); 
+        }
+        .btn-danger { 
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%); 
+            color: white; 
+        }
+        .users-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); 
+            gap: 20px; 
+            margin-top: 20px; 
+        }
+        .user-card { 
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%); 
+            border: 2px solid #e2e8f0; 
+            border-radius: 12px; 
+            padding: 25px; 
+            transition: all 0.3s; 
+            position: relative; 
+            overflow: hidden; 
+        }
+        .user-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+        }
+        .user-card::before { 
+            content: ''; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            height: 4px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+        }
+        .user-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+            margin-bottom: 20px; 
+        }
+        .user-info h3 { 
+            color: #2d3748; 
+            margin-bottom: 5px; 
+            font-size: 1.3rem; 
+        }
+        .user-info p { 
+            color: #4a5568; 
+            font-size: 0.9rem; 
+        }
+        .role-badge { 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-size: 0.8rem; 
+            font-weight: 600; 
+        }
+        .role-owner { 
+            background: #fed7d7; 
+            color: #c53030; 
+        }
+        .role-manager { 
+            background: #feebc8; 
+            color: #c05621; 
+        }
+        .role-viewer { 
+            background: #c6f6d5; 
+            color: #22543d; 
+        }
+        .role-readonly { 
+            background: #e6fffa; 
+            color: #234e52; 
+        }
+        .user-details { 
+            margin-bottom: 20px; 
+        }
+        .detail-row { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 8px; 
+            padding: 5px 0; 
+            border-bottom: 1px solid #e2e8f0; 
+        }
+        .detail-label { 
+            font-weight: 600; 
+            color: #4a5568; 
+        }
+        .detail-value { 
+            color: #2d3748; 
+            text-align: right; 
+            max-width: 60%; 
+            word-break: break-word; 
+        }
+        .country-restrictions { 
+            background: #e6fffa; 
+            border: 1px solid #81e6d9; 
+            border-radius: 8px; 
+            padding: 15px; 
+            margin: 15px 0; 
+        }
+        .country-restrictions h4 { 
+            color: #234e52; 
+            margin-bottom: 10px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+        .country-list { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 5px; 
+        }
+        .country-tag { 
+            background: #4fd1c7; 
+            color: white; 
+            padding: 3px 8px; 
+            border-radius: 12px; 
+            font-size: 0.8rem; 
+        }
+        .user-actions { 
+            display: flex; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+        }
+        .btn-small { 
+            padding: 6px 12px; 
+            font-size: 0.8rem; 
+        }
+        .modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.5); 
+        }
+        .modal-content { 
+            background-color: white; 
+            margin: 2% auto; 
+            padding: 30px; 
+            border-radius: 12px; 
+            width: 90%; 
+            max-width: 600px; 
+            max-height: 90vh; 
+            overflow-y: auto; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2); 
+        }
+        .modal-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+        }
+        .modal-header h2 { 
+            color: #2d3748; 
+        }
+        .close { 
+            color: #aaa; 
+            font-size: 28px; 
+            font-weight: bold; 
+            cursor: pointer; 
+        }
+        .close:hover { 
+            color: #000; 
+        }
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        .form-group label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 600; 
+            color: #4a5568; 
+        }
+        .form-group input, .form-group select, .form-group textarea { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 8px; 
+            font-size: 1rem; 
+            transition: border-color 0.3s; 
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { 
+            outline: none; 
+            border-color: #667eea; 
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); 
+        }
+        .checkbox-group { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 15px; 
+            margin-top: 10px; 
+        }
+        .checkbox-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+        .checkbox-item input[type="checkbox"] { 
+            width: auto; 
+        }
+        .form-section { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+        }
+        .form-section h3 { 
+            color: #2d3748; 
+            margin-bottom: 15px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+        .restriction-type { 
+            display: flex; 
+            gap: 20px; 
+            margin-bottom: 15px; 
+        }
+        .radio-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+        .radio-item input[type="radio"] { 
+            width: auto; 
+        }
+        .success-message { 
+            background: #c6f6d5; 
+            color: #22543d; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            border: 1px solid #9ae6b4; 
+        }
+        .error-message { 
+            background: #fed7d7; 
+            color: #c53030; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            border: 1px solid #feb2b2; 
+        }
+        @media (max-width: 768px) { 
+            .header { 
+                flex-direction: column; 
+                gap: 20px; 
+                text-align: center; 
+            }
+            .action-bar { 
+                flex-direction: column; 
+                gap: 15px; 
+            }
+            .users-grid { 
+                grid-template-columns: 1fr; 
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👥 User Management</h1>
+            <div class="user-info">
+                <div class="country-badge">
+                    🌍 {{ user.current_country_name }}
+                    {% if user.is_vpn %}<span style="color: #fbb6ce;">🔒 VPN</span>{% endif %}
+                </div>
+                <p>{{ user.name }} ({{ user.role|title }})</p>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="action-bar">
+                <h2>Manage Dashboard Access</h2>
+                <div>
+                    <button class="btn btn-primary" onclick="openCreateUserModal()">
+                        ➕ Add New User
+                    </button>
+                    <a href="/dashboard/{{ access_token }}" class="btn btn-primary">
+                        ← Back to Dashboard
+                    </a>
+                </div>
+            </div>
+            
+            <div id="users-container">
+                <div id="users-grid" class="users-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create User Modal -->
+    <div id="createUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New User</h2>
+                <span class="close" onclick="closeCreateUserModal()">&times;</span>
+            </div>
+            <form id="createUserForm">
+                <div class="form-group">
+                    <label for="name">Full Name:</label>
+                    <input type="text" id="name" name="name" required placeholder="e.g., John Smith">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address:</label>
+                    <input type="email" id="email" name="email" required placeholder="e.g., john@company.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="role">User Role:</label>
+                    <select id="role" name="role">
+                        <option value="readonly">Read-Only (View visitors only)</option>
+                        <option value="viewer" selected>Viewer (Basic access)</option>
+                        <option value="manager">Manager (Advanced access)</option>
+                        <option value="owner">Owner (Full access)</option>
+                    </select>
+                </div>
+                
+                <div class="form-section">
+                    <h3>🌍 Country Restrictions</h3>
+                    
+                    <div class="restriction-type">
+                        <div class="radio-item">
+                            <input type="radio" id="allow_countries" name="restriction_type" value="allow" checked>
+                            <label for="allow_countries">Only allow these countries</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="block_countries" name="restriction_type" value="block">
+                            <label for="block_countries">Block these countries</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Select Countries:</label>
+                        <div class="checkbox-group" id="countries-list">
+                            <!-- Countries will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Or Select Continents:</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="continent_na" name="continents" value="NA">
+                                <label for="continent_na">North America</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="continent_eu" name="continents" value="EU">
+                                <label for="continent_eu">Europe</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="continent_as" name="continents" value="AS">
+                                <label for="continent_as">Asia</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="continent_sa" name="continents" value="SA">
+                                <label for="continent_sa">South America</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="continent_af" name="continents" value="AF">
+                                <label for="continent_af">Africa</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="continent_oc" name="continents" value="OC">
+                                <label for="continent_oc">Oceania</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="block_vpn" name="block_vpn">
+                        <label for="block_vpn">🔒 Block VPN/Proxy connections</label>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>⏰ Access Duration</h3>
+                    <div class="form-group">
+                        <label for="access_duration">Access Duration (hours, leave empty for permanent):</label>
+                        <input type="number" id="access_duration" name="access_duration" placeholder="e.g., 24 for 24 hours">
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>🔐 Permissions</h3>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="perm_view_email" name="permissions" value="view_email" checked>
+                            <label for="perm_view_email">View email addresses</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="perm_view_phone" name="permissions" value="view_phone" checked>
+                            <label for="perm_view_phone">View phone numbers</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="perm_view_company" name="permissions" value="view_company" checked>
+                            <label for="perm_view_company">View company information</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="perm_export_data" name="permissions" value="export_data">
+                            <label for="perm_export_data">Export data (CSV/Excel)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="perm_view_audit_logs" name="permissions" value="view_audit_logs">
+                            <label for="perm_view_audit_logs">View audit logs</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="session_limit">Maximum Concurrent Sessions:</label>
+                    <select id="session_limit" name="session_limit">
+                        <option value="1" selected>1 session</option>
+                        <option value="2">2 sessions</option>
+                        <option value="3">3 sessions</option>
+                        <option value="5">5 sessions</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notes">Notes (optional):</label>
+                    <textarea id="notes" name="notes" rows="3" placeholder="Internal notes about this user..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    🚀 Create User with Restrictions
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let users = [];
+        let countries = [];
+        const accessToken = '{{ access_token }}';
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCountries();
+            loadUsers();
+        });
+
+        async function loadCountries() {
+            try {
+                const response = await fetch('/api/countries');
+                const data = await response.json();
+                countries = data.countries;
+                populateCountriesList();
+            } catch (error) {
+                console.error('Error loading countries:', error);
+            }
+        }
+
+        function populateCountriesList() {
+            const container = document.getElementById('countries-list');
+            container.innerHTML = '';
+            
+            // Show popular countries first
+            const popularCountries = ['US', 'CA', 'GB', 'AU', 'DE', 'FR', 'JP', 'IN', 'BR', 'MX'];
+            const otherCountries = countries.filter(c => !popularCountries.includes(c.code));
+            
+            [...popularCountries.map(code => countries.find(c => c.code === code)).filter(Boolean), ...otherCountries]
+                .forEach(country => {
+                    const div = document.createElement('div');
+                    div.className = 'checkbox-item';
+                    div.innerHTML = `
+                        <input type="checkbox" id="country_${country.code}" name="countries" value="${country.code}">
+                        <label for="country_${country.code}">${country.name}</label>
+                    `;
+                    container.appendChild(div);
+                });
+        }
+
+        async function loadUsers() {
+            try {
+                const response = await fetch(`/api/user-management/${accessToken}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+                
+                users = data.users;
+                displayUsers();
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+                showError('Failed to load users');
+            }
+        }
+
+        function displayUsers() {
+            const grid = document.getElementById('users-grid');
+            
+            if (users.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; color: #4a5568; padding: 40px;">No users found. Create your first user to get started!</p>';
+                return;
+            }
+
+            grid.innerHTML = '';
+            users.forEach(user => {
+                const userCard = createUserCard(user);
+                grid.appendChild(userCard);
+            });
+        }
+
+        function createUserCard(user) {
+            const card = document.createElement('div');
+            card.className = 'user-card';
+
+            const roleClass = `role-${user.role}`;
+            const restrictions = user.country_restrictions || {};
+            const allowedCountries = restrictions.countries || [];
+            const allowedContinents = restrictions.continents || [];
+            
+            let restrictionText = 'No restrictions';
+            if (allowedCountries.length > 0 || allowedContinents.length > 0) {
+                const type = restrictions.type === 'block' ? 'Blocked' : 'Allowed';
+                restrictionText = `${type}: ${allowedCountries.length} countries, ${allowedContinents.length} continents`;
+            }
+
+            card.innerHTML = `
+                <div class="user-header">
+                    <div class="user-info">
+                        <h3>${user.name}</h3>
+                        <p>${user.email}</p>
+                    </div>
+                    <span class="role-badge ${roleClass}">
+                        ${user.role.toUpperCase()}
+                    </span>
+                </div>
+                
+                <div class="user-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value">${user.status}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Created:</span>
+                        <span class="detail-value">${formatDate(user.created_at)}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Last Access:</span>
+                        <span class="detail-value">${user.last_access ? formatDate(user.last_access) : 'Never'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Access Expires:</span>
+                        <span class="detail-value">${user.access_expires_at ? formatDate(user.access_expires_at) : 'Never'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Session Limit:</span>
+                        <span class="detail-value">${user.session_limit}</span>
+                    </div>
+                </div>
+
+                <div class="country-restrictions">
+                    <h4>🌍 Geographic Access</h4>
+                    <p>${restrictionText}</p>
+                    ${allowedCountries.length > 0 ? `
+                        <div class="country-list" style="margin-top: 10px;">
+                            ${allowedCountries.map(code => `<span class="country-tag">${getCountryName(code)}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="user-actions">
+                    <button class="btn btn-primary btn-small" onclick="copyDashboardUrl('${user.user_id}')">
+                        📋 Copy URL
+                    </button>
+                    <button class="btn btn-danger btn-small" onclick="restrictUser('${user.user_id}', 'deactivate')">
+                        🚫 Deactivate
+                    </button>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function getCountryName(code) {
+            const country = countries.find(c => c.code === code);
+            return country ? country.name : code;
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function openCreateUserModal() {
+            document.getElementById('createUserModal').style.display = 'block';
+        }
+
+        function closeCreateUserModal() {
+            document.getElementById('createUserModal').style.display = 'none';
+            document.getElementById('createUserForm').reset();
+        }
+
+        async function createUser(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            
+            // Collect selected countries and continents
+            const selectedCountries = Array.from(document.querySelectorAll('input[name="countries"]:checked')).map(cb => cb.value);
+            const selectedContinents = Array.from(document.querySelectorAll('input[name="continents"]:checked')).map(cb => cb.value);
+            
+            // Collect permissions
+            const permissions = {};
+            document.querySelectorAll('input[name="permissions"]:checked').forEach(cb => {
+                permissions[cb.value] = true;
+            });
+
+            const userData = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                role: formData.get('role'),
+                restriction_type: formData.get('restriction_type'),
+                allowed_countries: selectedCountries,
+                allowed_continents: selectedContinents,
+                block_vpn: document.getElementById('block_vpn').checked,
+                access_duration: formData.get('access_duration') || null,
+                permissions: permissions,
+                session_limit: parseInt(formData.get('session_limit')),
+                notes: formData.get('notes')
+            };
+
+            try {
+                const response = await fetch(`/api/create-user/${accessToken}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showSuccess(`User created successfully! Dashboard URL: ${result.dashboard_url}`);
+                    closeCreateUserModal();
+                    loadUsers(); // Refresh the user list
+                } else {
+                    showError(result.error || 'Failed to create user');
+                }
+            } catch (error) {
+                console.error('Error creating user:', error);
+                showError('Failed to create user');
+            }
+        }
+
+        async function restrictUser(userId, action) {
+            if (!confirm(`Are you sure you want to ${action} this user?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/restrict-user/${accessToken}/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action: action })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showSuccess(result.message);
+                    loadUsers(); // Refresh the user list
+                } else {
+                    showError(result.error || `Failed to ${action} user`);
+                }
+            } catch (error) {
+                console.error(`Error ${action} user:`, error);
+                showError(`Failed to ${action} user`);
+            }
+        }
+
+        function copyDashboardUrl(userId) {
+            const user = users.find(u => u.user_id === userId);
+            if (user) {
+                const url = `${window.location.origin}/dashboard/${user.access_token || 'TOKEN_NOT_AVAILABLE'}`;
+                navigator.clipboard.writeText(url).then(() => {
+                    showSuccess('Dashboard URL copied to clipboard!');
+                }).catch(() => {
+                    showError('Failed to copy URL');
+                });
+            }
+        }
+
+        function showSuccess(message) {
+            const notification = document.createElement('div');
+            notification.className = 'success-message';
+            notification.textContent = message;
+            
+            const mainContent = document.querySelector('.main-content');
+            mainContent.insertBefore(notification, mainContent.firstChild);
+
+            setTimeout(() => notification.remove(), 5000);
+        }
+
+        function showError(message) {
+            const notification = document.createElement('div');
+            notification.className = 'error-message';
+            notification.textContent = message;
+            
+            const mainContent = document.querySelector('.main-content');
+            mainContent.insertBefore(notification, mainContent.firstChild);
+
+            setTimeout(() => notification.remove(), 5000);
+        }
+
+        // Attach form submit handler
+        document.getElementById('createUserForm').addEventListener('submit', createUser);
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('createUserModal');
+            if (event.target === modal) {
+                closeCreateUserModal();
+            }
+        }
+    </script>
+</body>
+</html>
+
