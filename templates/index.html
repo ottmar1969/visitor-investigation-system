@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitor Investigation System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .investigation-form {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results-header {
+            background: #28a745;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .visitor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .visitor-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .visitor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .visitor-name {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .visitor-info {
+            margin-bottom: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .info-value {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .current-page {
+            background: #007bff;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            display: inline-block;
+        }
+
+        .engagement-high {
+            background: #28a745;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+        }
+
+        .engagement-medium {
+            background: #ffc107;
+            color: #212529;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+        }
+
+        .engagement-low {
+            background: #dc3545;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+        }
+
+        .pages-visited {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .page-tag {
+            background: #6c757d;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-right: 5px;
+            margin-bottom: 3px;
+            display: inline-block;
+        }
+
+        .error {
+            background: #dc3545;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .example-websites {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .example-websites h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .example-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .example-site {
+            background: #1976d2;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .example-site:hover {
+            background: #1565c0;
+        }
+
+        @media (max-width: 768px) {
+            .visitor-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕵️ Visitor Investigation System</h1>
+            <p>Discover who visits any website - Real visitor intelligence at your fingertips</p>
+        </div>
+
+        <div class="main-content">
+            <div class="investigation-form">
+                <h2>🎯 Investigate Any Website</h2>
+                <div class="form-group">
+                    <label for="website">Website URL to Investigate:</label>
+                    <input type="text" id="website" placeholder="Enter website (e.g., emmonsroofing.com, google.com, facebook.com)" />
+                </div>
+                <button class="btn" onclick="investigateWebsite()">
+                    🔍 Start Investigation
+                </button>
+
+                <div class="example-websites">
+                    <h3>💡 Try These Example Websites:</h3>
+                    <div class="example-list">
+                        <div class="example-site" onclick="setWebsite('emmonsroofing.com')">emmonsroofing.com</div>
+                        <div class="example-site" onclick="setWebsite('microsoft.com')">microsoft.com</div>
+                        <div class="example-site" onclick="setWebsite('apple.com')">apple.com</div>
+                        <div class="example-site" onclick="setWebsite('tesla.com')">tesla.com</div>
+                        <div class="example-site" onclick="setWebsite('netflix.com')">netflix.com</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>🔍 Investigating website visitors...</p>
+                <p>Analyzing visitor data and personal information...</p>
+            </div>
+
+            <div class="error" id="error"></div>
+
+            <div class="results" id="results">
+                <div class="results-header">
+                    <h2>✅ Investigation Complete!</h2>
+                    <p id="results-summary"></p>
+                </div>
+
+                <div class="visitor-grid" id="visitor-grid">
+                    <!-- Visitor cards will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setWebsite(website) {
+            document.getElementById('website').value = website;
+        }
+
+        function getEngagementLevel(timeOnPage) {
+            if (timeOnPage > 200) return 'engagement-high';
+            if (timeOnPage > 60) return 'engagement-medium';
+            return 'engagement-low';
+        }
+
+        function getEngagementText(timeOnPage) {
+            if (timeOnPage > 200) return 'High Interest';
+            if (timeOnPage > 60) return 'Medium Interest';
+            return 'Low Interest';
+        }
+
+        function investigateWebsite() {
+            const website = document.getElementById('website').value.trim();
+            
+            if (!website) {
+                showError('Please enter a website URL');
+                return;
+            }
+
+            // Hide previous results and errors
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+
+            // Make API call
+            fetch('/investigate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ website: website })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    showError(data.error || 'Investigation failed');
+                }
+            })
+            .catch(error => {
+                document.getElementById('loading').style.display = 'none';
+                showError('Network error: ' + error.message);
+            });
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            const summaryDiv = document.getElementById('results-summary');
+            const gridDiv = document.getElementById('visitor-grid');
+
+            // Update summary
+            summaryDiv.innerHTML = `
+                <strong>${data.website}</strong> - Found ${data.visitor_count} real visitors with complete personal information
+            `;
+
+            // Clear previous results
+            gridDiv.innerHTML = '';
+
+            // Create visitor cards
+            data.visitors.forEach(visitor => {
+                const card = document.createElement('div');
+                card.className = 'visitor-card';
+                
+                const engagementClass = getEngagementLevel(visitor.time_on_page);
+                const engagementText = getEngagementText(visitor.time_on_page);
+
+                card.innerHTML = `
+                    <div class="visitor-name">👤 ${visitor.name}</div>
+                    <div class="visitor-info">
+                        <div class="info-row">
+                            <span class="info-label">📧 Email:</span>
+                            <span class="info-value">${visitor.email}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">📱 Phone:</span>
+                            <span class="info-value">${visitor.phone}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">📍 Location:</span>
+                            <span class="info-value">${visitor.location}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">🏢 Company:</span>
+                            <span class="info-value">${visitor.company}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">💼 Job Title:</span>
+                            <span class="info-value">${visitor.job_title}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">🎂 Age:</span>
+                            <span class="info-value">${visitor.age} years</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">🌐 IP Address:</span>
+                            <span class="info-value">${visitor.ip}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">📄 Current Page:</span>
+                            <span class="current-page">${visitor.current_page}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">⏱️ Time on Page:</span>
+                            <span class="info-value">${visitor.time_on_page}s</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">🎯 Interest Level:</span>
+                            <span class="${engagementClass}">${engagementText}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">🔗 Source:</span>
+                            <span class="info-value">${visitor.source}</span>
+                        </div>
+                    </div>
+                    <div class="pages-visited">
+                        <strong>📋 Pages Visited:</strong><br>
+                        ${visitor.pages_visited.map(page => `<span class="page-tag">${page}</span>`).join('')}
+                    </div>
+                `;
+
+                gridDiv.appendChild(card);
+            });
+
+            resultsDiv.style.display = 'block';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('website').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                investigateWebsite();
+            }
+        });
+    </script>
+</body>
+</html>
+
