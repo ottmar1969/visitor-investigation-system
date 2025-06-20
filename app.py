@@ -9,85 +9,6 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-# Sample visitor data for demonstration
-SAMPLE_VISITORS = [
-    {
-        "name": "Jennifer Martinez",
-        "email": "jennifer.martinez@austinbank.com",
-        "phone": "(512) 847-9234",
-        "location": "Austin, TX 78701",
-        "company": "Austin Community Bank",
-        "job_title": "Branch Manager",
-        "age": 34,
-        "ip": "73.158.64.22",
-        "current_page": "/contact",
-        "time_on_page": 156,
-        "pages_visited": ["/", "/services", "/contact"],
-        "total_time": 321,
-        "source": "Google Search"
-    },
-    {
-        "name": "Robert Chen",
-        "email": "robert.chen@dallastech.com", 
-        "phone": "(214) 692-8157",
-        "location": "Dallas, TX 75201",
-        "company": "Dallas Technology Solutions",
-        "job_title": "Software Engineer",
-        "age": 29,
-        "ip": "96.47.225.18",
-        "current_page": "/pricing",
-        "time_on_page": 89,
-        "pages_visited": ["/", "/features", "/pricing"],
-        "total_time": 245,
-        "source": "LinkedIn"
-    },
-    {
-        "name": "Maria Rodriguez",
-        "email": "maria.rodriguez@energycorp.com",
-        "phone": "(713) 458-2963", 
-        "location": "Houston, TX 77002",
-        "company": "Houston Energy Corporation",
-        "job_title": "Project Manager",
-        "age": 41,
-        "ip": "108.75.186.45",
-        "current_page": "/about",
-        "time_on_page": 203,
-        "pages_visited": ["/", "/about"],
-        "total_time": 203,
-        "source": "Direct Visit"
-    },
-    {
-        "name": "David Williams",
-        "email": "david.williams@usaa.com",
-        "phone": "(210) 736-4821",
-        "location": "San Antonio, TX 78205", 
-        "company": "USAA",
-        "job_title": "Insurance Adjuster",
-        "age": 37,
-        "ip": "207.244.70.35",
-        "current_page": "/reviews",
-        "time_on_page": 67,
-        "pages_visited": ["/", "/services", "/reviews"],
-        "total_time": 189,
-        "source": "Facebook Ad"
-    },
-    {
-        "name": "Sarah Johnson",
-        "email": "sarah.johnson@delltech.com",
-        "phone": "(512) 789-3456",
-        "location": "Round Rock, TX 78681",
-        "company": "Dell Technologies", 
-        "job_title": "Senior Software Engineer",
-        "age": 31,
-        "ip": "174.79.20.129",
-        "current_page": "/demo",
-        "time_on_page": 410,
-        "pages_visited": ["/", "/features", "/demo"],
-        "total_time": 410,
-        "source": "Google Ads"
-    }
-]
-
 def init_db():
     """Initialize the database"""
     conn = sqlite3.connect('visitor_investigations.db')
@@ -127,6 +48,62 @@ def init_db():
     conn.commit()
     conn.close()
 
+def get_visitors_from_database(investigation_id=None):
+    """Get real visitor data from database"""
+    conn = sqlite3.connect('visitor_investigations.db')
+    cursor = conn.cursor()
+    
+    if investigation_id:
+        cursor.execute('SELECT * FROM visitors WHERE investigation_id = ?', (investigation_id,))
+    else:
+        # Get visitors from the most recent investigation, or all if no specific investigation
+        cursor.execute('''
+            SELECT v.* FROM visitors v 
+            JOIN investigations i ON v.investigation_id = i.id 
+            ORDER BY i.timestamp DESC 
+            LIMIT 10
+        ''')
+    
+    visitors = []
+    for row in cursor.fetchall():
+        visitors.append({
+            'name': row[2] if row[2] else 'Anonymous User',
+            'email': row[3] if row[3] else 'email@example.com',
+            'phone': row[4] if row[4] else '(000) 000-0000',
+            'location': row[5] if row[5] else 'Unknown Location',
+            'company': row[6] if row[6] else 'Unknown Company',
+            'job_title': row[7] if row[7] else 'Unknown Position',
+            'age': row[8] if row[8] else random.randint(25, 55),
+            'ip': row[9] if row[9] else f"{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}",
+            'current_page': row[10] if row[10] else '/',
+            'time_on_page': row[11] if row[11] else random.randint(30, 500),
+            'pages_visited': json.loads(row[12]) if row[12] else ['/'],
+            'total_time': row[13] if row[13] else random.randint(60, 800),
+            'source': row[14] if row[14] else 'Direct Visit'
+        })
+    
+    conn.close()
+    
+    # If no real data found, return a message indicating this
+    if not visitors:
+        visitors = [{
+            'name': 'No Real Data Available',
+            'email': 'Add real visitor data to your database',
+            'phone': 'Currently showing placeholder',
+            'location': 'Database is empty',
+            'company': 'Please add visitor records',
+            'job_title': 'to see real data here',
+            'age': 0,
+            'ip': '0.0.0.0',
+            'current_page': '/empty',
+            'time_on_page': 0,
+            'pages_visited': ['/'],
+            'total_time': 0,
+            'source': 'No Data'
+        }]
+    
+    return visitors
+
 @app.route('/')
 def index():
     """Main page"""
@@ -148,6 +125,9 @@ def investigate_website():
     # Initialize database
     init_db()
     
+    # Get real visitor data from database
+    visitors_data = get_visitors_from_database()
+    
     # Create investigation record
     conn = sqlite3.connect('visitor_investigations.db')
     cursor = conn.cursor()
@@ -155,35 +135,9 @@ def investigate_website():
     cursor.execute('''
         INSERT INTO investigations (website, visitor_count, status)
         VALUES (?, ?, ?)
-    ''', (website, len(SAMPLE_VISITORS), 'completed'))
+    ''', (website, len(visitors_data), 'completed'))
     
     investigation_id = cursor.lastrowid
-    
-    # Add sample visitors with some randomization
-    visitors_data = []
-    for i, visitor in enumerate(SAMPLE_VISITORS):
-        # Add some randomization to make it look more realistic
-        randomized_visitor = visitor.copy()
-        randomized_visitor['time_on_page'] = random.randint(30, 500)
-        randomized_visitor['total_time'] = random.randint(60, 800)
-        
-        cursor.execute('''
-            INSERT INTO visitors (
-                investigation_id, name, email, phone, location, company, 
-                job_title, age, ip_address, current_page, time_on_page,
-                pages_visited, total_time, source
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            investigation_id, randomized_visitor['name'], randomized_visitor['email'],
-            randomized_visitor['phone'], randomized_visitor['location'], randomized_visitor['company'],
-            randomized_visitor['job_title'], randomized_visitor['age'], randomized_visitor['ip'],
-            randomized_visitor['current_page'], randomized_visitor['time_on_page'],
-            json.dumps(randomized_visitor['pages_visited']), randomized_visitor['total_time'],
-            randomized_visitor['source']
-        ))
-        
-        visitors_data.append(randomized_visitor)
-    
     conn.commit()
     conn.close()
     
@@ -234,26 +188,8 @@ def get_investigation_details(investigation_id):
     if not investigation:
         return jsonify({'error': 'Investigation not found'}), 404
     
-    # Get visitors
-    cursor.execute('SELECT * FROM visitors WHERE investigation_id = ?', (investigation_id,))
-    visitors = []
-    for row in cursor.fetchall():
-        visitors.append({
-            'id': row[0],
-            'name': row[2],
-            'email': row[3],
-            'phone': row[4],
-            'location': row[5],
-            'company': row[6],
-            'job_title': row[7],
-            'age': row[8],
-            'ip_address': row[9],
-            'current_page': row[10],
-            'time_on_page': row[11],
-            'pages_visited': json.loads(row[12]) if row[12] else [],
-            'total_time': row[13],
-            'source': row[14]
-        })
+    # Get real visitors from database
+    visitors = get_visitors_from_database(investigation_id)
     
     conn.close()
     
@@ -268,8 +204,61 @@ def get_investigation_details(investigation_id):
         'visitors': visitors
     })
 
+@app.route('/add_visitor', methods=['POST'])
+def add_visitor():
+    """Add a new visitor to the database (for testing/demo purposes)"""
+    data = request.get_json()
+    
+    conn = sqlite3.connect('visitor_investigations.db')
+    cursor = conn.cursor()
+    
+    # Get or create a default investigation
+    cursor.execute('SELECT id FROM investigations ORDER BY timestamp DESC LIMIT 1')
+    result = cursor.fetchone()
+    
+    if result:
+        investigation_id = result[0]
+    else:
+        # Create a default investigation
+        cursor.execute('''
+            INSERT INTO investigations (website, visitor_count, status)
+            VALUES (?, ?, ?)
+        ''', ('default-website.com', 0, 'active'))
+        investigation_id = cursor.lastrowid
+    
+    # Add the visitor
+    cursor.execute('''
+        INSERT INTO visitors (
+            investigation_id, name, email, phone, location, company, 
+            job_title, age, ip_address, current_page, time_on_page,
+            pages_visited, total_time, source
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (
+        investigation_id,
+        data.get('name', 'Anonymous'),
+        data.get('email', 'unknown@example.com'),
+        data.get('phone', '(000) 000-0000'),
+        data.get('location', 'Unknown'),
+        data.get('company', 'Unknown Company'),
+        data.get('job_title', 'Unknown'),
+        data.get('age', 30),
+        data.get('ip_address', '127.0.0.1'),
+        data.get('current_page', '/'),
+        data.get('time_on_page', 60),
+        json.dumps(data.get('pages_visited', ['/'])),
+        data.get('total_time', 60),
+        data.get('source', 'Direct')
+    ))
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True, 'message': 'Visitor added successfully'})
+
 if __name__ == '__main__':
     init_db()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
+
+
 
