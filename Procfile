@@ -1,2 +1,2 @@
-web: gunicorn enhanced_app_complete:app
+web: gunicorn app:app
 
