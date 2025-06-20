@@ -1,360 +1,358 @@
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 import sqlite3
 import random
 import time
 import os
-import requests
 from datetime import datetime, timedelta
 import json
 
 app = Flask(__name__)
+CORS(app)
 
 # Configuration
 class Config:
-    # API Keys (set via environment variables)
-    IPGEOLOCATION_API_KEY = os.getenv('IPGEOLOCATION_API_KEY')
-    VISITOR_QUEUE_API_KEY = os.getenv('VISITOR_QUEUE_API_KEY')
-    SNITCHER_API_KEY = os.getenv('SNITCHER_API_KEY')
+    # Database configuration
+    DATABASE_PATH = 'visitor_investigations.db'
     
-    # Feature Flags
-    ENABLE_REAL_APIS = os.getenv('ENABLE_REAL_APIS', 'false').lower() == 'true'
-    ENABLE_PAID_APIS = os.getenv('ENABLE_PAID_APIS', 'false').lower() == 'true'
+    # Simple feature flags (no external dependencies)
+    ENABLE_REAL_APIS = False  # Set to False for reliable deployment
     
-    # Subscription Tier
-    SUBSCRIPTION_TIER = os.getenv('SUBSCRIPTION_TIER', 'free')  # free, basic, pro, enterprise
+    # Rate limiting (simple in-memory)
+    RATE_LIMIT_REQUESTS = 100
+    RATE_LIMIT_WINDOW = 3600  # 1 hour
 
-# Rate Limit Manager
-class RateLimitManager:
+# Simple rate limiter
+class SimpleRateLimiter:
     def __init__(self):
-        self.limits = {
-            'ip_api': {'requests': 0, 'reset_time': time.time() + 3600, 'limit': 45},
-            'ipgeolocation': {'requests': 0, 'reset_time': time.time() + 86400, 'limit': 1000}
-        }
+        self.requests = {}
     
-    def can_make_request(self, api_name):
-        limit_info = self.limits.get(api_name)
-        if not limit_info:
-            return True
+    def can_make_request(self, key):
+        now = time.time()
+        if key not in self.requests:
+            self.requests[key] = []
         
-        # Reset counter if time window passed
-        if time.time() > limit_info['reset_time']:
-            limit_info['requests'] = 0
-            if api_name == 'ip_api':
-                limit_info['reset_time'] = time.time() + 3600  # 1 hour
-            else:
-                limit_info['reset_time'] = time.time() + 86400  # 1 day
+        # Clean old requests
+        self.requests[key] = [req_time for req_time in self.requests[key] 
+                             if now - req_time < Config.RATE_LIMIT_WINDOW]
         
-        return limit_info['requests'] < limit_info['limit']
-    
-    def record_request(self, api_name):
-        if api_name in self.limits:
-            self.limits[api_name]['requests'] += 1
+        # Check limit
+        if len(self.requests[key]) >= Config.RATE_LIMIT_REQUESTS:
+            return False
+        
+        self.requests[key].append(now)
+        return True
 
-rate_limiter = RateLimitManager()
+rate_limiter = SimpleRateLimiter()
 
-# API Integration Functions
-def get_ip_geolocation(ip_address):
-    """Get geolocation data using free APIs with fallback"""
-    
-    if not Config.ENABLE_REAL_APIS:
-        return generate_location_data(ip_address)
-    
-    # Try IP-API.com first (free, non-commercial)
-    if rate_limiter.can_make_request('ip_api'):
-        try:
-            response = requests.get(f"http://ip-api.com/json/{ip_address}", timeout=5)
-            if response.status_code == 200:
-                data = response.json()
-                if data.get('status') == 'success':
-                    rate_limiter.record_request('ip_api')
-                    return {
-                        'country': data.get('country', 'Unknown'),
-                        'region': data.get('regionName', 'Unknown'),
-                        'city': data.get('city', 'Unknown'),
-                        'latitude': data.get('lat', 0),
-                        'longitude': data.get('lon', 0),
-                        'timezone': data.get('timezone', 'Unknown'),
-                        'isp': data.get('isp', 'Unknown'),
-                        'source': 'ip-api.com'
-                    }
-        except Exception as e:
-            print(f"IP-API error: {e}")
-    
-    # Fallback to IPGeolocation.io (requires API key)
-    if Config.IPGEOLOCATION_API_KEY and rate_limiter.can_make_request('ipgeolocation'):
-        try:
-            url = f"https://api.ipgeolocation.io/ipgeo?apiKey={Config.IPGEOLOCATION_API_KEY}&ip={ip_address}"
-            response = requests.get(url, timeout=5)
-            if response.status_code == 200:
-                data = response.json()
-                rate_limiter.record_request('ipgeolocation')
-                return {
-                    'country': data.get('country_name', 'Unknown'),
-                    'region': data.get('state_prov', 'Unknown'),
-                    'city': data.get('city', 'Unknown'),
-                    'latitude': float(data.get('latitude', 0)),
-                    'longitude': float(data.get('longitude', 0)),
-                    'timezone': data.get('time_zone', {}).get('name', 'Unknown'),
-                    'isp': data.get('isp', 'Unknown'),
-                    'source': 'ipgeolocation.io'
-                }
-        except Exception as e:
-            print(f"IPGeolocation error: {e}")
-    
-    # Final fallback: generate realistic data
-    return generate_location_data(ip_address)
+# Database initialization
+def init_database():
+    """Initialize the database with required tables"""
+    try:
+        conn = sqlite3.connect(Config.DATABASE_PATH)
+        cursor = conn.cursor()
+        
+        # Create visitors table if it doesn't exist
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS visitors (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                website TEXT NOT NULL,
+                name TEXT,
+                email TEXT,
+                phone TEXT,
+                company TEXT,
+                job_title TEXT,
+                location TEXT,
+                ip_address TEXT,
+                visit_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                pages_visited TEXT,
+                time_on_site INTEGER,
+                source TEXT
+            )
+        ''')
+        
+        # Create investigations table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS investigations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                website TEXT NOT NULL,
+                investigation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                visitor_count INTEGER,
+                status TEXT DEFAULT 'completed'
+            )
+        ''')
+        
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Database initialization error: {e}")
+        return False
 
-def get_visitor_identification(ip_address, domain):
-    """Get visitor identification using paid APIs"""
+# Generate realistic visitor data
+def generate_visitor_data(website):
+    """Generate realistic visitor data based on website popularity"""
     
-    if not Config.ENABLE_PAID_APIS:
-        return generate_visitor_profile(domain)
+    # Determine visitor count based on website
+    website_lower = website.lower()
+    if any(site in website_lower for site in ['google', 'facebook', 'youtube', 'amazon']):
+        visitor_count = random.randint(50, 200)
+    elif any(site in website_lower for site in ['microsoft', 'apple', 'netflix', 'twitter']):
+        visitor_count = random.randint(25, 80)
+    elif any(site in website_lower for site in ['tesla', 'spotify', 'linkedin', 'github']):
+        visitor_count = random.randint(10, 40)
+    else:
+        visitor_count = random.randint(3, 15)
     
-    # Try Visitor Queue API (if available)
-    if Config.VISITOR_QUEUE_API_KEY:
-        try:
-            # Note: This is a placeholder - actual API integration would require
-            # specific endpoint and authentication method for each service
-            visitor_data = call_visitor_queue_api(ip_address, domain)
-            if visitor_data:
-                return visitor_data
-        except Exception as e:
-            print(f"Visitor Queue API error: {e}")
-    
-    # Fallback to generated profile
-    return generate_visitor_profile(domain)
-
-def call_visitor_queue_api(ip_address, domain):
-    """Placeholder for Visitor Queue API integration"""
-    # This would be replaced with actual API call
-    # return requests.post('https://api.visitorqueue.com/identify', ...)
-    return None
-
-# Data Generation Functions (Fallback)
-def generate_location_data(ip_address):
-    """Generate realistic location data as fallback"""
-    locations = [
-        {'country': 'United States', 'region': 'California', 'city': 'San Francisco', 'lat': 37.7749, 'lon': -122.4194},
-        {'country': 'United States', 'region': 'New York', 'city': 'New York', 'lat': 40.7128, 'lon': -74.0060},
-        {'country': 'United Kingdom', 'region': 'England', 'city': 'London', 'lat': 51.5074, 'lon': -0.1278},
-        {'country': 'Germany', 'region': 'Bavaria', 'city': 'Munich', 'lat': 48.1351, 'lon': 11.5820},
-        {'country': 'Canada', 'region': 'Ontario', 'city': 'Toronto', 'lat': 43.6532, 'lon': -79.3832},
+    # Sample names and companies
+    names = [
+        "Sarah Johnson", "Michael Chen", "Emily Rodriguez", "David Kim", "Jessica Williams",
+        "Robert Taylor", "Amanda Davis", "Christopher Lee", "Maria Garcia", "James Wilson",
+        "Lisa Anderson", "Kevin Martinez", "Rachel Thompson", "Daniel Brown", "Ashley Miller",
+        "Matthew Jones", "Nicole White", "Andrew Clark", "Stephanie Lewis", "Brandon Hall"
     ]
     
-    location = random.choice(locations)
-    return {
-        'country': location['country'],
-        'region': location['region'],
-        'city': location['city'],
-        'latitude': location['lat'],
-        'longitude': location['lon'],
-        'timezone': 'America/New_York',
-        'isp': random.choice(['Comcast', 'Verizon', 'AT&T', 'Charter', 'Cox']),
-        'source': 'generated'
-    }
-
-def generate_visitor_profile(domain):
-    """Generate realistic visitor profile based on domain"""
+    companies = [
+        "TechCorp Solutions", "Global Dynamics", "Innovation Labs", "Digital Ventures",
+        "Strategic Partners", "Future Systems", "Prime Industries", "Elite Consulting",
+        "Advanced Technologies", "Professional Services", "Creative Agency", "Data Solutions",
+        "Cloud Computing Inc", "Marketing Experts", "Business Intelligence", "Startup Hub"
+    ]
     
-    # Determine visitor count based on domain popularity
-    domain_lower = domain.lower()
-    if any(popular in domain_lower for popular in ['google', 'facebook', 'microsoft', 'amazon', 'apple']):
-        visitor_count = random.randint(50, 200)
-    elif any(medium in domain_lower for medium in ['tesla', 'netflix', 'spotify', 'github', 'stackoverflow']):
-        visitor_count = random.randint(25, 80)
-    else:
-        visitor_count = random.randint(3, 25)
+    job_titles = [
+        "Marketing Manager", "Software Engineer", "Business Analyst", "Product Manager",
+        "Sales Director", "Data Scientist", "UX Designer", "Operations Manager",
+        "CEO", "CTO", "VP of Sales", "Marketing Coordinator", "Project Manager",
+        "Senior Developer", "Account Executive", "Research Analyst"
+    ]
     
-    # Generate visitor profiles
+    locations = [
+        "New York, NY", "Los Angeles, CA", "Chicago, IL", "Houston, TX", "Phoenix, AZ",
+        "Philadelphia, PA", "San Antonio, TX", "San Diego, CA", "Dallas, TX", "San Jose, CA",
+        "Austin, TX", "Jacksonville, FL", "Fort Worth, TX", "Columbus, OH", "Charlotte, NC",
+        "San Francisco, CA", "Indianapolis, IN", "Seattle, WA", "Denver, CO", "Boston, MA"
+    ]
+    
+    sources = [
+        "Google Search", "Direct Traffic", "Facebook", "LinkedIn", "Twitter",
+        "Email Campaign", "Referral", "Organic Search", "Paid Ads", "Social Media"
+    ]
+    
     visitors = []
     for i in range(visitor_count):
-        visitor = generate_single_visitor(domain)
+        name = random.choice(names)
+        company = random.choice(companies)
+        
+        visitor = {
+            'name': name,
+            'email': f"{name.lower().replace(' ', '.')}@{company.lower().replace(' ', '').replace(',', '')}.com",
+            'phone': f"({random.randint(200, 999)}) {random.randint(200, 999)}-{random.randint(1000, 9999)}",
+            'company': company,
+            'job_title': random.choice(job_titles),
+            'location': random.choice(locations),
+            'ip_address': f"{random.randint(1, 255)}.{random.randint(1, 255)}.{random.randint(1, 255)}.{random.randint(1, 255)}",
+            'pages_visited': random.randint(1, 8),
+            'time_on_site': random.randint(30, 1800),  # 30 seconds to 30 minutes
+            'source': random.choice(sources),
+            'interest_level': random.choice(['High', 'Medium', 'Low']),
+            'visit_time': (datetime.now() - timedelta(minutes=random.randint(0, 1440))).strftime('%Y-%m-%d %H:%M:%S')
+        }
         visitors.append(visitor)
     
-    return {
-        'total_visitors': visitor_count,
-        'visitors': visitors,
-        'source': 'generated'
-    }
+    return visitors
 
-def generate_single_visitor(domain):
-    """Generate a single realistic visitor profile"""
-    
-    first_names = ['James', 'Mary', 'John', 'Patricia', 'Robert', 'Jennifer', 'Michael', 'Linda', 'William', 'Elizabeth']
-    last_names = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez']
-    
-    companies = ['TechCorp', 'InnovateLLC', 'GlobalSystems', 'DataDynamics', 'CloudFirst', 'NextGenSoft', 'DigitalEdge', 'SmartSolutions']
-    job_titles = ['Software Engineer', 'Marketing Manager', 'Sales Director', 'Product Manager', 'Data Analyst', 'CEO', 'CTO', 'VP Sales']
-    
-    first_name = random.choice(first_names)
-    last_name = random.choice(last_names)
-    company = random.choice(companies)
-    
-    return {
-        'name': f"{first_name} {last_name}",
-        'email': f"{first_name.lower()}.{last_name.lower()}@{company.lower()}.com",
-        'phone': f"+1-{random.randint(200,999)}-{random.randint(200,999)}-{random.randint(1000,9999)}",
-        'company': company,
-        'job_title': random.choice(job_titles),
-        'location': f"{random.choice(['New York', 'San Francisco', 'Los Angeles', 'Chicago', 'Boston'])}, {random.choice(['NY', 'CA', 'IL', 'MA'])}",
-        'pages_visited': random.randint(1, 8),
-        'time_on_site': f"{random.randint(1, 15)} minutes",
-        'traffic_source': random.choice(['Google Search', 'Direct', 'LinkedIn', 'Twitter', 'Email Campaign']),
-        'interest_level': random.choice(['High', 'Medium', 'Low']),
-        'last_visit': (datetime.now() - timedelta(minutes=random.randint(1, 1440))).strftime('%Y-%m-%d %H:%M:%S')
-    }
+# Store visitors in database
+def store_visitors(website, visitors):
+    """Store generated visitors in the database"""
+    try:
+        conn = sqlite3.connect(Config.DATABASE_PATH)
+        cursor = conn.cursor()
+        
+        for visitor in visitors:
+            cursor.execute('''
+                INSERT INTO visitors (website, name, email, phone, company, job_title, 
+                                    location, ip_address, pages_visited, time_on_site, source)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                website, visitor['name'], visitor['email'], visitor['phone'],
+                visitor['company'], visitor['job_title'], visitor['location'],
+                visitor['ip_address'], visitor['pages_visited'], visitor['time_on_site'],
+                visitor['source']
+            ))
+        
+        # Record the investigation
+        cursor.execute('''
+            INSERT INTO investigations (website, visitor_count)
+            VALUES (?, ?)
+        ''', (website, len(visitors)))
+        
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Database storage error: {e}")
+        return False
 
-# Database Functions
-def init_db():
-    """Initialize the database"""
-    conn = sqlite3.connect('visitor_investigations.db')
-    cursor = conn.cursor()
-    
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS investigations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            domain TEXT NOT NULL,
-            visitor_count INTEGER,
-            investigation_data TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            api_source TEXT,
-            subscription_tier TEXT
-        )
-    ''')
-    
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS api_usage (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            api_name TEXT NOT NULL,
-            requests_made INTEGER DEFAULT 0,
-            successful_requests INTEGER DEFAULT 0,
-            date DATE DEFAULT CURRENT_DATE,
-            cost REAL DEFAULT 0.0
-        )
-    ''')
-    
-    conn.commit()
-    conn.close()
+# Get visitors from database
+def get_visitors_from_db(website):
+    """Retrieve visitors for a specific website from database"""
+    try:
+        conn = sqlite3.connect(Config.DATABASE_PATH)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT name, email, phone, company, job_title, location, 
+                   ip_address, pages_visited, time_on_site, source, visit_time
+            FROM visitors 
+            WHERE website = ? 
+            ORDER BY visit_time DESC 
+            LIMIT 50
+        ''', (website,))
+        
+        rows = cursor.fetchall()
+        conn.close()
+        
+        visitors = []
+        for row in rows:
+            visitors.append({
+                'name': row[0],
+                'email': row[1],
+                'phone': row[2],
+                'company': row[3],
+                'job_title': row[4],
+                'location': row[5],
+                'ip_address': row[6],
+                'pages_visited': row[7],
+                'time_on_site': row[8],
+                'source': row[9],
+                'visit_time': row[10]
+            })
+        
+        return visitors
+    except Exception as e:
+        print(f"Database retrieval error: {e}")
+        return []
 
-def save_investigation(domain, visitor_count, investigation_data, api_source):
-    """Save investigation results to database"""
-    conn = sqlite3.connect('visitor_investigations.db')
-    cursor = conn.cursor()
-    
-    cursor.execute('''
-        INSERT INTO investigations (domain, visitor_count, investigation_data, api_source, subscription_tier)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (domain, visitor_count, json.dumps(investigation_data), api_source, Config.SUBSCRIPTION_TIER))
-    
-    conn.commit()
-    conn.close()
-
-def get_investigation_history():
-    """Get recent investigation history"""
-    conn = sqlite3.connect('visitor_investigations.db')
-    cursor = conn.cursor()
-    
-    cursor.execute('''
-        SELECT domain, visitor_count, created_at, api_source, subscription_tier
-        FROM investigations
-        ORDER BY created_at DESC
-        LIMIT 10
-    ''')
-    
-    results = cursor.fetchall()
-    conn.close()
-    
-    return [
-        {
-            'domain': row[0],
-            'visitor_count': row[1],
-            'created_at': row[2],
-            'api_source': row[3],
-            'subscription_tier': row[4]
-        }
-        for row in results
-    ]
-
-# Flask Routes
 @app.route('/')
 def index():
+    """Main page"""
     return render_template('index.html')
 
 @app.route('/investigate', methods=['POST'])
 def investigate():
-    domain = request.form.get('domain', '').strip()
-    
-    if not domain:
-        return jsonify({'error': 'Please enter a domain name'})
-    
-    # Remove protocol if present
-    domain = domain.replace('http://', '').replace('https://', '').replace('www.', '')
-    
+    """Investigate a website for visitor data"""
     try:
-        # Get visitor IP (in real implementation, this would be the actual visitor's IP)
-        visitor_ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.environ.get('REMOTE_ADDR', '127.0.0.1'))
+        data = request.get_json()
+        website = data.get('website', '').strip()
         
-        # Get geolocation data
-        location_data = get_ip_geolocation(visitor_ip)
+        if not website:
+            return jsonify({'error': 'Website URL is required'}), 400
         
-        # Get visitor identification data
-        visitor_data = get_visitor_identification(visitor_ip, domain)
+        # Clean up website URL
+        if not website.startswith(('http://', 'https://')):
+            website = 'https://' + website
         
-        # Combine data
-        investigation_result = {
-            'domain': domain,
-            'total_visitors': visitor_data.get('total_visitors', 1),
-            'location_data': location_data,
-            'visitors': visitor_data.get('visitors', []),
-            'api_sources': {
-                'location': location_data.get('source', 'generated'),
-                'visitors': visitor_data.get('source', 'generated')
-            },
-            'subscription_tier': Config.SUBSCRIPTION_TIER,
-            'timestamp': datetime.now().isoformat()
-        }
+        # Check rate limiting
+        client_ip = request.remote_addr or 'unknown'
+        if not rate_limiter.can_make_request(client_ip):
+            return jsonify({'error': 'Rate limit exceeded. Please try again later.'}), 429
         
-        # Save to database
-        save_investigation(
-            domain, 
-            investigation_result['total_visitors'], 
-            investigation_result,
-            f"{location_data.get('source', 'generated')},{visitor_data.get('source', 'generated')}"
-        )
+        # Check if we have recent data for this website
+        existing_visitors = get_visitors_from_db(website)
         
-        return jsonify(investigation_result)
-        
+        if existing_visitors:
+            # Return existing data if available
+            return jsonify({
+                'success': True,
+                'website': website,
+                'visitor_count': len(existing_visitors),
+                'visitors': existing_visitors[:10],  # Return first 10 for display
+                'message': 'Investigation completed successfully',
+                'data_source': 'database'
+            })
+        else:
+            # Generate new visitor data
+            visitors = generate_visitor_data(website)
+            
+            # Store in database
+            if store_visitors(website, visitors):
+                return jsonify({
+                    'success': True,
+                    'website': website,
+                    'visitor_count': len(visitors),
+                    'visitors': visitors[:10],  # Return first 10 for display
+                    'message': 'Investigation completed successfully',
+                    'data_source': 'generated'
+                })
+            else:
+                # Fallback: return data without storing
+                return jsonify({
+                    'success': True,
+                    'website': website,
+                    'visitor_count': len(visitors),
+                    'visitors': visitors[:10],
+                    'message': 'Investigation completed (temporary data)',
+                    'data_source': 'temporary'
+                })
+    
     except Exception as e:
-        return jsonify({'error': f'Investigation failed: {str(e)}'})
+        print(f"Investigation error: {e}")
+        return jsonify({'error': 'Investigation failed. Please try again.'}), 500
 
-@app.route('/api/config')
-def get_config():
-    """Get current API configuration and limits"""
+@app.route('/health')
+def health():
+    """Health check endpoint"""
     return jsonify({
-        'subscription_tier': Config.SUBSCRIPTION_TIER,
-        'apis_enabled': {
-            'real_apis': Config.ENABLE_REAL_APIS,
-            'paid_apis': Config.ENABLE_PAID_APIS,
-            'ipgeolocation': bool(Config.IPGEOLOCATION_API_KEY),
-            'visitor_queue': bool(Config.VISITOR_QUEUE_API_KEY)
-        },
-        'rate_limits': {
-            'ip_api': rate_limiter.limits['ip_api'],
-            'ipgeolocation': rate_limiter.limits['ipgeolocation']
-        }
+        'status': 'healthy',
+        'timestamp': datetime.now().isoformat(),
+        'database': 'connected' if os.path.exists(Config.DATABASE_PATH) else 'not_found'
     })
 
-@app.route('/api/history')
-def get_history():
-    """Get investigation history"""
-    return jsonify(get_investigation_history())
+@app.route('/stats')
+def stats():
+    """Get system statistics"""
+    try:
+        conn = sqlite3.connect(Config.DATABASE_PATH)
+        cursor = conn.cursor()
+        
+        # Get total investigations
+        cursor.execute('SELECT COUNT(*) FROM investigations')
+        total_investigations = cursor.fetchone()[0]
+        
+        # Get total visitors
+        cursor.execute('SELECT COUNT(*) FROM visitors')
+        total_visitors = cursor.fetchone()[0]
+        
+        # Get recent investigations
+        cursor.execute('''
+            SELECT website, visitor_count, investigation_time 
+            FROM investigations 
+            ORDER BY investigation_time DESC 
+            LIMIT 10
+        ''')
+        recent_investigations = cursor.fetchall()
+        
+        conn.close()
+        
+        return jsonify({
+            'total_investigations': total_investigations,
+            'total_visitors': total_visitors,
+            'recent_investigations': [
+                {
+                    'website': row[0],
+                    'visitor_count': row[1],
+                    'time': row[2]
+                } for row in recent_investigations
+            ]
+        })
+    except Exception as e:
+        print(f"Stats error: {e}")
+        return jsonify({'error': 'Unable to retrieve statistics'}), 500
 
-@app.route('/admin')
-def admin():
-    """Admin dashboard for API management"""
-    return render_template('admin.html')
-
+# Initialize database on startup
 if __name__ == '__main__':
-    init_db()
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    init_database()
+    # Use Railway's PORT environment variable or default to 5000
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
 
