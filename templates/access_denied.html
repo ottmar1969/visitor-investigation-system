@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied - Visitor Investigation System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px; 
+        }
+        .container { 
+            max-width: 500px; 
+            background: white; 
+            border-radius: 15px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+            padding: 40px; 
+            text-align: center; 
+        }
+        .error-icon { 
+            font-size: 4rem; 
+            color: #f56565; 
+            margin-bottom: 20px; 
+        }
+        h1 { 
+            color: #2d3748; 
+            margin-bottom: 15px; 
+            font-size: 2rem; 
+        }
+        p { 
+            color: #4a5568; 
+            margin-bottom: 20px; 
+            line-height: 1.6; 
+        }
+        .reasons { 
+            background: #f8f9fa; 
+            border-radius: 8px; 
+            padding: 20px; 
+            margin: 20px 0; 
+            text-align: left; 
+        }
+        .reasons h3 { 
+            color: #2d3748; 
+            margin-bottom: 15px; 
+        }
+        .reasons ul { 
+            color: #4a5568; 
+            padding-left: 20px; 
+        }
+        .reasons li { 
+            margin-bottom: 8px; 
+        }
+        .btn { 
+            display: inline-block; 
+            padding: 12px 24px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            transition: transform 0.3s; 
+        }
+        .btn:hover { 
+            transform: translateY(-2px); 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-icon">🚫</div>
+        <h1>Access Denied</h1>
+        <p>You don't have permission to access this dashboard. This could be due to several reasons:</p>
+        
+        <div class="reasons">
+            <h3>Possible Reasons:</h3>
+            <ul>
+                <li>Invalid or expired access token</li>
+                <li>Subscription has been cancelled or suspended</li>
+                <li>Payment issues with your account</li>
+                <li>Dashboard access has been deactivated</li>
+            </ul>
+        </div>
+        
+        <p>If you believe this is an error, please contact your administrator or check your subscription status.</p>
+        
+        <a href="/" class="btn">Return to Main Site</a>
+    </div>
+</body>
+</html>
+
