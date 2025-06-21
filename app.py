@@ -129,7 +129,10 @@ def verify_credentials(username, password):
 # Routes
 @app.route('/')
 def index():
-    return redirect(url_for('login'))
+    # Check if logged in, if not redirect to login
+    if 'logged_in' not in session or not session['logged_in']:
+        return redirect(url_for('login'))
+    return render_template('dashboard.html', active_tab='investigation')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -140,7 +143,7 @@ def login():
         if verify_credentials(username, password):
             session['logged_in'] = True
             session['username'] = username
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('index'))
         else:
             return render_template('login.html', error='Invalid credentials')
     
@@ -151,15 +154,14 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    return render_template('dashboard.html', active_tab='investigation')
-
 @app.route('/admin')
 @login_required
 def admin():
     return render_template('dashboard.html', active_tab='admin')
+
+@app.route('/admin/login')
+def admin_login():
+    return redirect(url_for('login'))
 
 @app.route('/admin/trials')
 @login_required
@@ -170,6 +172,10 @@ def admin_trials():
 @login_required
 def admin_users():
     return render_template('dashboard.html', active_tab='users')
+
+@app.route('/pricing')
+def pricing():
+    return render_template('pricing.html')
 
 # API Routes
 @app.route('/api/clients', methods=['GET'])
@@ -241,13 +247,13 @@ def get_trials():
         trials_data.append({
             'id': trial[0],
             'client_id': trial[1],
-            'client_name': trial[7] if len(trial) > 7 else 'Unknown',
+            'client_name': trial[8] if len(trial) > 8 else 'Unknown',
             'trial_type': trial[2],
             'duration_hours': trial[3],
             'start_time': trial[4],
             'end_time': trial[5],
             'is_active': trial[6],
-            'created_by': trial[7] if len(trial) > 7 else 'system'
+            'created_by': trial[7]
         })
     
     return jsonify(trials_data)
@@ -363,43 +369,92 @@ def generate_demo_data():
     # Clear existing data
     cursor.execute('DELETE FROM visitor_investigations')
     
-    # Demo data
+    # Demo data with comprehensive information
     demo_visitors = [
         {
             'name': 'Sarah Johnson',
             'email': 'sarah.johnson@microsoft.com',
+            'phone': '+1-555-0123',
             'company': 'Microsoft Corporation',
             'title': 'VP of Marketing',
-            'location': 'United States',
+            'industry': 'Technology',
+            'location': 'United States, Washington, Seattle',
             'device': 'Desktop',
             'browser': 'Chrome',
             'duration': 1256,
-            'pages': ['/blog', '/pricing'],
-            'interest': 'HIGH'
+            'pages': ['/blog', '/pricing', '/features'],
+            'interest': 'HIGH',
+            'referral': 'Google Search',
+            'sessions': 3,
+            'page_views': 8
         },
         {
             'name': 'Michael Chen',
             'email': 'm.chen@apple.com',
+            'phone': '+1-555-0456',
             'company': 'Apple Inc.',
             'title': 'Product Manager',
-            'location': 'United States',
+            'industry': 'Technology',
+            'location': 'United States, California, Cupertino',
             'device': 'Mobile',
             'browser': 'Safari',
             'duration': 847,
-            'pages': ['/home', '/about'],
-            'interest': 'MEDIUM'
+            'pages': ['/home', '/about', '/contact'],
+            'interest': 'MEDIUM',
+            'referral': 'LinkedIn',
+            'sessions': 2,
+            'page_views': 5
         },
         {
             'name': 'Emma Rodriguez',
             'email': 'emma.r@google.com',
+            'phone': '+1-555-0789',
             'company': 'Google LLC',
             'title': 'Software Engineer',
-            'location': 'United States',
+            'industry': 'Technology',
+            'location': 'United States, California, Mountain View',
             'device': 'Tablet',
             'browser': 'Chrome',
             'duration': 423,
-            'pages': ['/api'],
-            'interest': 'LOW'
+            'pages': ['/api', '/docs'],
+            'interest': 'LOW',
+            'referral': 'Direct',
+            'sessions': 1,
+            'page_views': 2
+        },
+        {
+            'name': 'David Wilson',
+            'email': 'david.wilson@salesforce.com',
+            'phone': '+1-555-0321',
+            'company': 'Salesforce',
+            'title': 'Sales Director',
+            'industry': 'Software',
+            'location': 'United States, California, San Francisco',
+            'device': 'Desktop',
+            'browser': 'Firefox',
+            'duration': 1890,
+            'pages': ['/pricing', '/demo', '/contact', '/features'],
+            'interest': 'HIGH',
+            'referral': 'Facebook Ads',
+            'sessions': 4,
+            'page_views': 12
+        },
+        {
+            'name': 'Lisa Thompson',
+            'email': 'lisa.t@amazon.com',
+            'phone': '+1-555-0654',
+            'company': 'Amazon',
+            'title': 'Marketing Manager',
+            'industry': 'E-commerce',
+            'location': 'United States, Washington, Seattle',
+            'device': 'Mobile',
+            'browser': 'Chrome',
+            'duration': 672,
+            'pages': ['/home', '/pricing'],
+            'interest': 'MEDIUM',
+            'referral': 'Twitter',
+            'sessions': 1,
+            'page_views': 3
         }
     ]
     
@@ -407,20 +462,23 @@ def generate_demo_data():
         visitor_id = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
         cursor.execute('''
             INSERT INTO visitor_investigations 
-            (visitor_id, name, email, company, job_title, location_country,
-             device_type, browser, pages_visited, visit_duration, interest_level,
+            (visitor_id, name, email, phone, company, job_title, industry, 
+             location_country, device_type, browser, pages_visited, visit_duration, 
+             interest_level, referral_source, session_count, total_page_views,
              first_visit, last_activity)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         ''', (
-            visitor_id, visitor['name'], visitor['email'], visitor['company'],
-            visitor['title'], visitor['location'], visitor['device'], visitor['browser'],
-            json.dumps(visitor['pages']), visitor['duration'], visitor['interest']
+            visitor_id, visitor['name'], visitor['email'], visitor['phone'],
+            visitor['company'], visitor['title'], visitor['industry'],
+            visitor['location'], visitor['device'], visitor['browser'],
+            json.dumps(visitor['pages']), visitor['duration'], visitor['interest'],
+            visitor['referral'], visitor['sessions'], visitor['page_views']
         ))
     
     conn.commit()
     conn.close()
     
-    return jsonify({'status': 'success', 'message': 'Demo data generated'})
+    return jsonify({'status': 'success', 'message': 'Demo data generated with comprehensive visitor information'})
 
 @app.route('/api/visitors')
 @login_required
@@ -438,14 +496,20 @@ def get_visitors():
             'id': visitor[0],
             'name': visitor[2] or 'Anonymous',
             'email': visitor[3] or '',
+            'phone': visitor[4] or '',
             'company': visitor[5] or 'Unknown Company',
             'title': visitor[6] or 'Unknown Title',
+            'industry': visitor[7] or 'Unknown Industry',
             'location': visitor[9] or 'Unknown',
             'device': visitor[14] or 'Unknown',
             'browser': visitor[16] or 'Unknown',
             'pages_visited': pages_visited,
             'duration': visitor[24] or 0,
             'interest_level': visitor[27] or 'LOW',
+            'referral_source': visitor[19] or 'Direct',
+            'session_count': visitor[25] or 1,
+            'total_page_views': visitor[26] or len(pages_visited),
+            'current_page': visitor[22] or (pages_visited[-1] if pages_visited else '/'),
             'last_activity': visitor[29]
         })
     
