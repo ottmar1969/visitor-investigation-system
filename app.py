@@ -14,10 +14,15 @@ import csv
 import io
 import requests
 import hashlib
+from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-change-this'
+app.secret_key = 'your-secret-key-change-this-in-production'
 CORS(app)
+
+# Admin credentials (in production, use proper user management)
+ADMIN_USERNAME = 'admin'
+ADMIN_PASSWORD = 'admin123'  # Change this in production!
 
 # Database initialization
 def init_db():
@@ -106,11 +111,32 @@ def init_db():
         )
     ''')
     
+    # Admin sessions table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS admin_sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id TEXT UNIQUE NOT NULL,
+            username TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            expires_at TIMESTAMP NOT NULL,
+            is_active BOOLEAN DEFAULT 1
+        )
+    ''')
+    
     conn.commit()
     conn.close()
 
 # Initialize database on startup
 init_db()
+
+# Authentication decorator
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'admin_logged_in' not in session or not session['admin_logged_in']:
+            return redirect(url_for('admin_login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 # Helper functions
 def generate_access_token():
@@ -118,6 +144,12 @@ def generate_access_token():
 
 def generate_visitor_id():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def verify_admin_credentials(username, password):
+    return username == ADMIN_USERNAME and password == ADMIN_PASSWORD
 
 def get_ip_info(ip_address):
     """Get geographic and ISP information from IP address"""
@@ -210,23 +242,11 @@ def calculate_interest_level(pages_visited, visit_duration, page_views):
     else:
         return 'LOW'
 
-# Routes
+# Public Routes (No Authentication Required)
 
 @app.route('/')
 def index():
     return render_template('index.html')
-
-@app.route('/admin')
-def admin_dashboard():
-    return render_template('admin_dashboard.html')
-
-@app.route('/admin/trials')
-def admin_trials():
-    return render_template('admin_trials.html')
-
-@app.route('/admin/users')
-def user_management():
-    return render_template('user_management.html')
 
 @app.route('/pricing')
 def pricing():
@@ -249,6 +269,45 @@ def client_dashboard(access_token):
 @app.route('/access-denied')
 def access_denied():
     return render_template('access_denied.html')
+
+# Admin Authentication Routes
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        if verify_admin_credentials(username, password):
+            session['admin_logged_in'] = True
+            session['admin_username'] = username
+            return redirect(url_for('admin_dashboard'))
+        else:
+            return render_template('admin_login.html', error='Invalid credentials')
+    
+    return render_template('admin_login.html')
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.clear()
+    return redirect(url_for('admin_login'))
+
+# Protected Admin Routes
+
+@app.route('/admin')
+@admin_required
+def admin_dashboard():
+    return render_template('admin_dashboard.html')
+
+@app.route('/admin/trials')
+@admin_required
+def admin_trials():
+    return render_template('admin_trials.html')
+
+@app.route('/admin/users')
+@admin_required
+def user_management():
+    return render_template('user_management.html')
 
 # API Routes
 
@@ -282,13 +341,13 @@ def investigate():
         
         if existing_visitor:
             # Update existing visitor
-            pages_visited = json.loads(existing_visitor[19] or '[]')
+            pages_visited = json.loads(existing_visitor[23] or '[]')
             if current_page not in pages_visited:
                 pages_visited.append(current_page)
             
-            visit_duration = existing_visitor[20] + 30  # Add 30 seconds
-            session_count = existing_visitor[21]
-            total_page_views = existing_visitor[22] + 1
+            visit_duration = existing_visitor[24] + 30  # Add 30 seconds
+            session_count = existing_visitor[25]
+            total_page_views = existing_visitor[26] + 1
             
             interest_level = calculate_interest_level(pages_visited, visit_duration, total_page_views)
             
@@ -374,7 +433,7 @@ def get_client_visitors(access_token):
         # Format visitors data
         visitors_data = []
         for visitor in visitors:
-            pages_visited = json.loads(visitor[19] or '[]')
+            pages_visited = json.loads(visitor[23] or '[]')
             visitors_data.append({
                 'id': visitor[0],
                 'visitor_id': visitor[1],
@@ -536,6 +595,94 @@ def generate_demo_data(access_token):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# Protected Admin API Routes
+
+@app.route('/api/clients', methods=['GET'])
+@admin_required
+def get_clients():
+    """Get all clients"""
+    conn = sqlite3.connect('visitor_investigations.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM clients ORDER BY created_at DESC')
+    clients = cursor.fetchall()
+    conn.close()
+    
+    clients_data = []
+    for client in clients:
+        clients_data.append({
+            'id': client[0],
+            'client_name': client[1],
+            'access_token': client[2],
+            'is_active': client[3],
+            'subscription_status': client[4],
+            'trial_end_date': client[5],
+            'created_at': client[6]
+        })
+    
+    return jsonify(clients_data)
+
+@app.route('/api/clients', methods=['POST'])
+@admin_required
+def create_client():
+    """Create new client"""
+    data = request.get_json()
+    client_name = data.get('client_name')
+    
+    if not client_name:
+        return jsonify({'error': 'Client name is required'}), 400
+    
+    access_token = generate_access_token()
+    
+    conn = sqlite3.connect('visitor_investigations.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO clients (client_name, access_token)
+        VALUES (?, ?)
+    ''', (client_name, access_token))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({
+        'status': 'success',
+        'client_name': client_name,
+        'access_token': access_token,
+        'dashboard_url': f'/client/{access_token}'
+    })
+
+@app.route('/api/trials', methods=['POST'])
+@admin_required
+def create_trial():
+    """Create trial for client"""
+    data = request.get_json()
+    client_id = data.get('client_id')
+    duration_hours = data.get('duration_hours', 24)
+    
+    if not client_id:
+        return jsonify({'error': 'Client ID is required'}), 400
+    
+    end_time = datetime.datetime.now() + datetime.timedelta(hours=duration_hours)
+    
+    conn = sqlite3.connect('visitor_investigations.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO trials (client_id, duration_hours, end_time)
+        VALUES (?, ?, ?)
+    ''', (client_id, duration_hours, end_time))
+    
+    # Update client trial end date
+    cursor.execute('''
+        UPDATE clients SET trial_end_date = ? WHERE id = ?
+    ''', (end_time, client_id))
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({
+        'status': 'success',
+        'message': f'Trial created for {duration_hours} hours',
+        'end_time': end_time.isoformat()
+    })
+
 @app.route('/api/export-visitors/<access_token>')
 def export_visitors(access_token):
     """Export visitor data as Excel or CSV"""
@@ -575,7 +722,7 @@ def export_visitors(access_token):
             
             # Data rows
             for visitor in visitors:
-                pages_visited = json.loads(visitor[19] or '[]')
+                pages_visited = json.loads(visitor[23] or '[]')
                 row = [
                     visitor[1], visitor[2] or 'Anonymous', visitor[3] or '', visitor[4] or '',
                     visitor[5] or 'Unknown Company', visitor[6] or 'Unknown Title', visitor[7] or 'Unknown Industry',
@@ -616,7 +763,7 @@ def export_visitors(access_token):
             
             # Data rows
             for visitor in visitors:
-                pages_visited = json.loads(visitor[19] or '[]')
+                pages_visited = json.loads(visitor[23] or '[]')
                 row = [
                     visitor[1], visitor[2] or 'Anonymous', visitor[3] or '', visitor[4] or '',
                     visitor[5] or 'Unknown Company', visitor[6] or 'Unknown Title', visitor[7] or 'Unknown Industry',
@@ -642,91 +789,6 @@ def export_visitors(access_token):
             
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-# Client Management APIs
-
-@app.route('/api/clients', methods=['GET'])
-def get_clients():
-    """Get all clients"""
-    conn = sqlite3.connect('visitor_investigations.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM clients ORDER BY created_at DESC')
-    clients = cursor.fetchall()
-    conn.close()
-    
-    clients_data = []
-    for client in clients:
-        clients_data.append({
-            'id': client[0],
-            'client_name': client[1],
-            'access_token': client[2],
-            'is_active': client[3],
-            'subscription_status': client[4],
-            'trial_end_date': client[5],
-            'created_at': client[6]
-        })
-    
-    return jsonify(clients_data)
-
-@app.route('/api/clients', methods=['POST'])
-def create_client():
-    """Create new client"""
-    data = request.get_json()
-    client_name = data.get('client_name')
-    
-    if not client_name:
-        return jsonify({'error': 'Client name is required'}), 400
-    
-    access_token = generate_access_token()
-    
-    conn = sqlite3.connect('visitor_investigations.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO clients (client_name, access_token)
-        VALUES (?, ?)
-    ''', (client_name, access_token))
-    conn.commit()
-    conn.close()
-    
-    return jsonify({
-        'status': 'success',
-        'client_name': client_name,
-        'access_token': access_token,
-        'dashboard_url': f'/client/{access_token}'
-    })
-
-@app.route('/api/trials', methods=['POST'])
-def create_trial():
-    """Create trial for client"""
-    data = request.get_json()
-    client_id = data.get('client_id')
-    duration_hours = data.get('duration_hours', 24)
-    
-    if not client_id:
-        return jsonify({'error': 'Client ID is required'}), 400
-    
-    end_time = datetime.datetime.now() + datetime.timedelta(hours=duration_hours)
-    
-    conn = sqlite3.connect('visitor_investigations.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO trials (client_id, duration_hours, end_time)
-        VALUES (?, ?, ?)
-    ''', (client_id, duration_hours, end_time))
-    
-    # Update client trial end date
-    cursor.execute('''
-        UPDATE clients SET trial_end_date = ? WHERE id = ?
-    ''', (end_time, client_id))
-    
-    conn.commit()
-    conn.close()
-    
-    return jsonify({
-        'status': 'success',
-        'message': f'Trial created for {duration_hours} hours',
-        'end_time': end_time.isoformat()
-    })
 
 # Health check endpoint
 @app.route('/health')

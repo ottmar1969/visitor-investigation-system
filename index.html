@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitor Investigation System - Professional Website Visitor Intelligence</title>
+    <meta name="description" content="Advanced visitor investigation and identification system. Track, analyze and identify your website visitors with comprehensive intelligence reports.">
+    <meta name="keywords" content="visitor tracking, website analytics, visitor identification, business intelligence, lead generation">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-large {
+            padding: 20px 40px;
+            font-size: 1.3rem;
+        }
+
+        .investigation-results {
+            margin-top: 2rem;
+        }
+
+        .visitor-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+
+        .visitor-card:hover {
+            transform: translateX(5px);
+        }
+
+        .visitor-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .info-value {
+            color: #666;
+        }
+
+        .interest-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .interest-high {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .interest-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .interest-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .pages-visited {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .page-tag {
+            display: inline-block;
+            background: #f8f9fa;
+            color: #333;
+            padding: 0.25rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            margin: 0.25rem;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 1px solid #c3e6cb;
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 3rem 0 1rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section ul li a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section ul li a:hover {
+            color: #667eea;
+        }
+
+        .contact-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #333;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            text-align: center;
+            color: #999;
+        }
+
+        /* Cookie Consent */
+        .cookie-consent {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 1rem;
+            z-index: 10000;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .cookie-consent.show {
+            transform: translateY(0);
+        }
+
+        .cookie-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .cookie-text {
+            flex: 1;
+        }
+
+        .cookie-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-cookie {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-accept {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-decline {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-settings {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .visitor-info {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .cookie-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .cookie-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">🔍 Visitor Investigation</a>
+            <ul class="nav-links">
+                <li><a href="/" class="active">Investigation</a></li>
+                <li><a href="/admin/login">Admin Dashboard</a></li>
+                <li><a href="/pricing">Pricing</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>🔍 Professional Visitor Investigation</h1>
+            <p>Discover who's visiting your website with advanced visitor identification and intelligence. Get detailed insights about your anonymous visitors.</p>
+            <button class="btn btn-large" onclick="startInvestigation()">🚀 Start Investigation</button>
+        </div>
+
+        <!-- Investigation Interface -->
+        <div class="card">
+            <h2>📊 Visitor Investigation Dashboard</h2>
+            <p>Click the button below to scan for current website visitors and reveal detailed intelligence about their identity, company, and behavior.</p>
+            
+            <button class="btn" onclick="startInvestigation()" id="investigateBtn">
+                🔍 Start Investigation
+            </button>
+            
+            <div id="investigationResults" class="investigation-results" style="display: none;">
+                <div class="success-message">
+                    ✅ Investigation complete! Found <span id="visitorCount">0</span> active visitors.
+                </div>
+                
+                <div id="visitorsList">
+                    <!-- Visitor cards will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="card">
+            <h2>🎯 Investigation Features</h2>
+            <div class="visitor-info">
+                <div class="info-item">
+                    <span class="info-label">👤 Identity:</span>
+                    <span class="info-value">Name, Email, Phone</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">🏢 Company:</span>
+                    <span class="info-value">Organization, Industry, Title</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">🌍 Location:</span>
+                    <span class="info-value">Country, Region, City</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">💻 Technology:</span>
+                    <span class="info-value">Device, OS, Browser</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">📈 Behavior:</span>
+                    <span class="info-value">Pages, Duration, Interest</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">📊 Analytics:</span>
+                    <span class="info-value">Sessions, Views, Source</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>🔍 Visitor Intelligence</h3>
+                <p>Professional website visitor investigation and identification system. Discover who's visiting your website with advanced intelligence reports.</p>
+                <div class="contact-info">
+                    <span>📧</span>
+                    <a href="mailto:support@visitorintel.site">support@visitorintel.site</a>
+                </div>
+                <div class="contact-info">
+                    <span>📱</span>
+                    <a href="https://wa.me/639451886246" target="_blank">WhatsApp: +639451886246</a>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h3>📋 Legal & Compliance</h3>
+                <ul>
+                    <li><a href="/terms-conditions">Terms & Conditions</a></li>
+                    <li><a href="/privacy-policy">Privacy Policy</a></li>
+                    <li><a href="/legal">Legal Information</a></li>
+                    <li><a href="/gdpr">GDPR Compliance</a></li>
+                    <li><a href="/cookie-policy">Cookie Policy</a></li>
+                    <li><a href="/data-protection">Data Protection</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>🚀 Services</h3>
+                <ul>
+                    <li><a href="/visitor-identification">Visitor Identification</a></li>
+                    <li><a href="/company-intelligence">Company Intelligence</a></li>
+                    <li><a href="/behavioral-analytics">Behavioral Analytics</a></li>
+                    <li><a href="/lead-generation">Lead Generation</a></li>
+                    <li><a href="/api-access">API Access</a></li>
+                    <li><a href="/custom-solutions">Custom Solutions</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>🛡️ Security & Trust</h3>
+                <ul>
+                    <li><a href="/security">Security Measures</a></li>
+                    <li><a href="/compliance">Compliance Standards</a></li>
+                    <li><a href="/certifications">Certifications</a></li>
+                    <li><a href="/audit-reports">Audit Reports</a></li>
+                    <li><a href="/incident-response">Incident Response</a></li>
+                    <li><a href="/transparency">Transparency Report</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2024 Visitor Investigation System. All rights reserved. | Professional Website Intelligence Solutions</p>
+            <p>🔒 Secure • 🛡️ GDPR Compliant • 📊 Enterprise Grade • 🌍 Global Coverage</p>
+        </div>
+    </footer>
+
+    <!-- GDPR Cookie Consent -->
+    <div class="cookie-consent" id="cookieConsent">
+        <div class="cookie-content">
+            <div class="cookie-text">
+                <strong>🍪 Cookie Consent & GDPR Compliance</strong><br>
+                We use essential cookies to ensure our website functions properly and analytics cookies to understand how you interact with our site. Your privacy is important to us and we comply with GDPR regulations.
+            </div>
+            <div class="cookie-buttons">
+                <button class="btn-cookie btn-accept" onclick="acceptCookies()">✅ Accept All</button>
+                <button class="btn-cookie btn-decline" onclick="declineCookies()">❌ Decline</button>
+                <button class="btn-cookie btn-settings" onclick="cookieSettings()">⚙️ Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Demo visitor data
+        const demoVisitors = [
+            {
+                name: 'Sarah Johnson',
+                email: 'sarah.johnson@microsoft.com',
+                company: 'Microsoft Corporation',
+                title: 'VP of Marketing',
+                location: 'United States, Washington, Seattle',
+                device: 'Desktop',
+                browser: 'Chrome',
+                duration: 1256,
+                pages: ['/blog', '/pricing', '/features'],
+                interest: 'HIGH'
+            },
+            {
+                name: 'Michael Chen',
+                email: 'm.chen@apple.com',
+                company: 'Apple Inc.',
+                title: 'Product Manager',
+                location: 'United States, California, Cupertino',
+                device: 'Mobile',
+                browser: 'Safari',
+                duration: 847,
+                pages: ['/home', '/about', '/contact'],
+                interest: 'MEDIUM'
+            },
+            {
+                name: 'Emma Rodriguez',
+                email: 'emma.r@google.com',
+                company: 'Google LLC',
+                title: 'Software Engineer',
+                location: 'United States, California, Mountain View',
+                device: 'Tablet',
+                browser: 'Chrome',
+                duration: 423,
+                pages: ['/api', '/docs'],
+                interest: 'LOW'
+            }
+        ];
+
+        function startInvestigation() {
+            const btn = document.getElementById('investigateBtn');
+            const results = document.getElementById('investigationResults');
+            
+            btn.textContent = '🔄 Investigating...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                displayResults();
+                btn.textContent = '🔍 Start New Investigation';
+                btn.disabled = false;
+            }, 3000);
+        }
+
+        function displayResults() {
+            const results = document.getElementById('investigationResults');
+            const visitorsList = document.getElementById('visitorsList');
+            const visitorCount = document.getElementById('visitorCount');
+            
+            visitorCount.textContent = demoVisitors.length;
+            
+            let html = '';
+            demoVisitors.forEach(visitor => {
+                const interestClass = `interest-${visitor.interest.toLowerCase()}`;
+                html += `
+                    <div class="visitor-card">
+                        <div class="visitor-info">
+                            <div class="info-item">
+                                <span class="info-label">👤 Name:</span>
+                                <span class="info-value">${visitor.name}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">📧 Email:</span>
+                                <span class="info-value">${visitor.email}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">🏢 Company:</span>
+                                <span class="info-value">${visitor.company}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">💼 Title:</span>
+                                <span class="info-value">${visitor.title}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">🌍 Location:</span>
+                                <span class="info-value">${visitor.location}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">💻 Device:</span>
+                                <span class="info-value">${visitor.device}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">🌐 Browser:</span>
+                                <span class="info-value">${visitor.browser}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">⏱️ Duration:</span>
+                                <span class="info-value">${visitor.duration} seconds</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">🎯 Interest:</span>
+                                <span class="interest-badge ${interestClass}">${visitor.interest}</span>
+                            </div>
+                        </div>
+                        <div class="pages-visited">
+                            <strong>📄 Pages Visited (${visitor.pages.length}):</strong>
+                            ${visitor.pages.map(page => `<span class="page-tag">${page}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            visitorsList.innerHTML = html;
+            results.style.display = 'block';
+        }
+
+        // Cookie Consent Functions
+        function showCookieConsent() {
+            if (!localStorage.getItem('cookieConsent')) {
+                setTimeout(() => {
+                    document.getElementById('cookieConsent').classList.add('show');
+                }, 2000);
+            }
+        }
+
+        function acceptCookies() {
+            localStorage.setItem('cookieConsent', 'accepted');
+            document.getElementById('cookieConsent').classList.remove('show');
+            // Enable analytics and tracking
+            console.log('Cookies accepted - Analytics enabled');
+        }
+
+        function declineCookies() {
+            localStorage.setItem('cookieConsent', 'declined');
+            document.getElementById('cookieConsent').classList.remove('show');
+            // Disable non-essential cookies
+            console.log('Cookies declined - Only essential cookies active');
+        }
+
+        function cookieSettings() {
+            alert('Cookie settings panel would open here. Users can customize their cookie preferences for different categories (Essential, Analytics, Marketing, etc.)');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            showCookieConsent();
+            
+            // Track page view (only if cookies accepted)
+            if (localStorage.getItem('cookieConsent') === 'accepted') {
+                // Analytics tracking code would go here
+                console.log('Page view tracked');
+            }
+        });
+
+        // Security: Disable right-click and F12
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
+
