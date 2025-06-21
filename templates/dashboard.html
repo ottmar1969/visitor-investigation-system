@@ -169,7 +169,50 @@
             gap: 8px;
         }
 
-        .btn:hover {
+        .investigation-form {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-input, .form-select {
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+        }
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
         }
@@ -479,6 +522,31 @@
     <div class="container">
         <!-- Investigation Tab -->
         <div id="investigation" class="tab-content active">
+            <!-- Website Investigation Input -->
+            <div class="card">
+                <h2>🔍 Website Visitor Investigation</h2>
+                <p>Enter a website URL to investigate current visitors and their detailed profiles.</p>
+                
+                <div class="investigation-form">
+                    <div class="form-group">
+                        <label for="website-url">Website URL:</label>
+                        <input type="url" id="website-url" placeholder="https://example.com" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="investigation-type">Investigation Type:</label>
+                        <select id="investigation-type" class="form-select">
+                            <option value="comprehensive">Comprehensive Analysis</option>
+                            <option value="quick">Quick Scan</option>
+                            <option value="deep">Deep Investigation</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="startInvestigation()">🚀 Start Investigation</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Investigation Results -->
             <div class="card">
                 <h2>📊 Live Visitor Intelligence</h2>
                 <div class="stats-grid">
@@ -503,8 +571,6 @@
                 <div class="controls-bar">
                     <h3>Visitor Intelligence Cards</h3>
                     <div>
-                        <button class="btn btn-success" onclick="generateDemoData()">🎯 Generate Demo Data</button>
-                        <button class="btn" onclick="refreshVisitors()">🔄 Refresh</button>
                         <button class="btn" onclick="exportData()">📊 Export CSV</button>
                     </div>
                 </div>
@@ -591,19 +657,15 @@
             const grid = document.getElementById('visitors-grid');
 
             loading.style.display = 'none';
-            container.style.display = 'block';
-
-            if (visitors.length === 0) {
-                grid.innerHTML = `
-                    <div class="no-data">
-                        <h3>No Visitors Found</h3>
-                        <p>Generate demo data to see visitor intelligence cards.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            grid.innerHTML = '';
+            containe                if (visitors.length === 0) {
+                    grid.innerHTML = `
+                        <div class="no-data">
+                            <h3>No Visitors Found</h3>
+                            <p>Enter a website URL above and click "Start Investigation" to see real visitor data.</p>
+                        </div>
+                    `;
+                    return;
+                }      grid.innerHTML = '';
             visitors.forEach(visitor => {
                 const card = createVisitorCard(visitor);
                 grid.appendChild(card);
@@ -727,23 +789,56 @@
             document.getElementById('avg-time').textContent = avgTime + 'm';
         }
 
-        // Generate demo data
-        async function generateDemoData() {
+        // Start investigation
+        async function startInvestigation() {
+            const websiteUrl = document.getElementById('website-url').value;
+            const investigationType = document.getElementById('investigation-type').value;
+            
+            if (!websiteUrl) {
+                alert('Please enter a website URL');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('visitors-container').style.display = 'none';
+            
             try {
-                const response = await fetch('/api/generate-demo-data');
+                const response = await fetch('/api/investigate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        website_url: websiteUrl,
+                        investigation_type: investigationType
+                    })
+                });
+                
                 const result = await response.json();
+                
                 if (result.status === 'success') {
+                    // Load the investigation results
                     loadVisitors();
+                } else {
+                    alert('Investigation failed: ' + result.message);
+                    document.getElementById('loading').style.display = 'none';
                 }
             } catch (error) {
-                console.error('Error generating demo data:', error);
+                console.error('Error starting investigation:', error);
+                alert('Error starting investigation. Please try again.');
+                document.getElementById('loading').style.display = 'none';
             }
         }
 
-        // Refresh visitors
-        function refreshVisitors() {
-            loadVisitors();
+        // Generate demo data
+        async function generateDemoData() {
+            // Removed - This system only works with real visitor data
+            alert('This system only tracks real visitors. Please use "Start Investigation" with a real website URL.');
         }
+
+        // Auto-refresh every 30 seconds
+        setInterval(loadVisitors, 30000);
 
         // Export data
         function exportData() {

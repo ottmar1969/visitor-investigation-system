@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pricing Plans - Visitor Investigation System</title>
+    <title>Pricing Plans - VisitorIntel</title>
     <style>
         * {
             margin: 0;
@@ -15,13 +15,13 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            color: #333;
         }
 
-        /* Navigation Bar */
         .navbar {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            padding: 1rem 2rem;
+            padding: 1rem 0;
             box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
@@ -29,72 +29,75 @@
         }
 
         .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
+            padding: 0 2rem;
         }
 
         .nav-brand {
             font-size: 1.5rem;
             font-weight: bold;
-            color: #333;
-            text-decoration: none;
+            color: #667eea;
         }
 
-        .nav-links {
+        .nav-tabs {
             display: flex;
-            list-style: none;
-            gap: 2rem;
+            gap: 1rem;
         }
 
-        .nav-links a {
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
             transition: all 0.3s ease;
+            font-weight: 500;
+            text-decoration: none;
+            color: #666;
         }
 
-        .nav-links a:hover, .nav-links a.active {
-            background: #667eea;
+        .nav-tab:hover, .nav-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             transform: translateY(-2px);
         }
 
-        /* Main Container */
         .container {
             max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 2rem;
+            margin: 0 auto;
+            padding: 4rem 2rem;
         }
 
-        .hero {
+        .pricing-header {
             text-align: center;
-            color: white;
-            margin-bottom: 3rem;
+            margin-bottom: 4rem;
         }
 
-        .hero h1 {
+        .pricing-title {
             font-size: 3rem;
+            font-weight: bold;
+            color: white;
             margin-bottom: 1rem;
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
 
-        .hero p {
+        .pricing-subtitle {
             font-size: 1.2rem;
-            opacity: 0.9;
+            color: rgba(255, 255, 255, 0.9);
             max-width: 600px;
             margin: 0 auto;
+            line-height: 1.6;
         }
 
         .pricing-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2rem;
-            margin-bottom: 3rem;
+            margin-bottom: 4rem;
         }
 
         .pricing-card {
@@ -106,6 +109,9 @@
             text-align: center;
             position: relative;
             transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .pricing-card:hover {
@@ -159,6 +165,7 @@
             list-style: none;
             margin-bottom: 2rem;
             text-align: left;
+            flex-grow: 1;
         }
 
         .plan-features li {
@@ -187,6 +194,7 @@
             text-decoration: none;
             display: inline-block;
             width: 100%;
+            margin-top: auto;
         }
 
         .btn:hover {
@@ -194,23 +202,18 @@
             box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
         }
 
-        .btn-secondary {
-            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
-        }
-
         .payment-methods {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 3rem;
             text-align: center;
-            margin-bottom: 2rem;
         }
 
         .payment-methods h3 {
-            color: #333;
             margin-bottom: 1rem;
+            color: #333;
         }
 
         .payment-icons {
@@ -221,152 +224,164 @@
         }
 
         .payment-icon {
-            background: white;
-            padding: 1rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-            min-width: 120px;
+            padding: 0.5rem;
         }
 
-        .features-comparison {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
+        .footer {
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 3rem 0 1rem;
+            margin-top: 4rem;
         }
 
-        .features-comparison h3 {
-            color: #333;
-            margin-bottom: 2rem;
-            text-align: center;
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
         }
 
-        .comparison-table {
-            width: 100%;
-            border-collapse: collapse;
+        .footer-section h4 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
         }
 
-        .comparison-table th,
-        .comparison-table td {
-            padding: 1rem;
-            text-align: center;
-            border-bottom: 1px solid #e1e5e9;
+        .footer-section ul {
+            list-style: none;
         }
 
-        .comparison-table th {
-            background: #f8f9fa;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .comparison-table td {
-            color: #666;
-        }
-
-        .feature-included {
-            color: #27ae60;
-            font-weight: bold;
-        }
-
-        .feature-not-included {
-            color: #e74c3c;
-        }
-
-        .faq-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .faq-section h3 {
-            color: #333;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        .faq-item {
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid #e1e5e9;
-            padding-bottom: 1rem;
-        }
-
-        .faq-question {
-            font-weight: bold;
-            color: #333;
+        .footer-section ul li {
             margin-bottom: 0.5rem;
         }
 
-        .faq-answer {
-            color: #666;
-            line-height: 1.6;
+        .footer-section ul li a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s ease;
         }
 
-        /* Mobile Responsive */
+        .footer-section ul li a:hover {
+            color: #667eea;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #ccc;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #333;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            text-align: center;
+            color: #666;
+        }
+
+        .cookie-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 1rem;
+            z-index: 10000;
+            display: none;
+        }
+
+        .cookie-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .cookie-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .cookie-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .cookie-accept {
+            background: #667eea;
+            color: white;
+        }
+
+        .cookie-decline {
+            background: #666;
+            color: white;
+        }
+
+        .cookie-settings {
+            background: transparent;
+            color: white;
+            border: 1px solid #666;
+        }
+
         @media (max-width: 768px) {
-            .nav-links {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .nav-container {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .hero h1 {
-                font-size: 2rem;
-            }
-
             .pricing-grid {
                 grid-template-columns: 1fr;
             }
-
-            .pricing-card.popular {
-                transform: none;
+            
+            .pricing-title {
+                font-size: 2rem;
             }
-
-            .payment-icons {
-                gap: 1rem;
+            
+            .nav-tabs {
+                flex-wrap: wrap;
+                gap: 0.5rem;
             }
-
-            .container {
-                padding: 0 1rem;
+            
+            .cookie-content {
+                flex-direction: column;
+                text-align: center;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="/" class="nav-brand">🔍 Visitor Investigation</a>
-            <ul class="nav-links">
-                <li><a href="/">Investigation</a></li>
-                <li><a href="/admin">Admin Dashboard</a></li>
-                <li><a href="/admin/trials">Trial Management</a></li>
-                <li><a href="/admin/users">User Management</a></li>
-                <li><a href="/pricing" class="active">Pricing</a></li>
-            </ul>
+            <div class="nav-brand">🔍 VisitorIntel</div>
+            <div class="nav-tabs">
+                <a href="/" class="nav-tab">Investigation</a>
+                <a href="/admin" class="nav-tab">Admin Dashboard</a>
+                <a href="/admin/trials" class="nav-tab">Trial Management</a>
+                <a href="/admin/users" class="nav-tab">User Management</a>
+                <a href="/pricing" class="nav-tab active">Pricing</a>
+            </div>
         </div>
     </nav>
 
     <div class="container">
-        <!-- Hero Section -->
-        <div class="hero">
-            <h1>🔍 Visitor Identification Pricing</h1>
-            <p>Choose the perfect plan for your visitor investigation needs. Get detailed insights about every visitor to your website.</p>
+        <div class="pricing-header">
+            <h1 class="pricing-title">🔍 VisitorIntel Pricing</h1>
+            <p class="pricing-subtitle">Choose the perfect plan for your visitor investigation needs. Get detailed insights about every visitor to your website.</p>
         </div>
 
-        <!-- Pricing Plans -->
         <div class="pricing-grid">
-            <!-- Starter Plan -->
             <div class="pricing-card">
                 <div class="plan-name">Starter</div>
                 <div class="plan-price">$67</div>
@@ -380,10 +395,9 @@
                     <li>Email support</li>
                     <li>7-day free trial</li>
                 </ul>
-                <button class="btn" onclick="selectPlan('starter', 67, 500)">Start Free Trial</button>
+                <button class="btn">Start Free Trial</button>
             </div>
 
-            <!-- Professional Plan -->
             <div class="pricing-card popular">
                 <div class="popular-badge">🔥 Most Popular</div>
                 <div class="plan-name">Professional</div>
@@ -400,10 +414,9 @@
                     <li>Priority support</li>
                     <li>14-day free trial</li>
                 </ul>
-                <button class="btn" onclick="selectPlan('professional', 147, 2500)">Start Free Trial</button>
+                <button class="btn">Start Free Trial</button>
             </div>
 
-            <!-- Business Plan -->
             <div class="pricing-card">
                 <div class="plan-name">Business</div>
                 <div class="plan-price">$499</div>
@@ -419,191 +432,135 @@
                     <li>Dedicated support</li>
                     <li>30-day free trial</li>
                 </ul>
-                <button class="btn" onclick="selectPlan('business', 499, 10000)">Start Free Trial</button>
+                <button class="btn">Start Free Trial</button>
             </div>
 
-            <!-- Enterprise Plan -->
             <div class="pricing-card">
                 <div class="plan-name">Enterprise</div>
                 <div class="plan-price">$999</div>
                 <div class="plan-period">per month</div>
-                <div class="plan-description">Maximum visitor identification capacity for large organizations</div>
+                <div class="plan-description">For large enterprises with high-volume visitor intelligence needs</div>
                 <ul class="plan-features">
-                    <li>15,000 visitor identifications</li>
+                    <li>25,000 visitor identifications</li>
                     <li>Enterprise visitor profiles</li>
-                    <li>Complete visitor intelligence</li>
-                    <li>Advanced reporting</li>
+                    <li>Complete contact database</li>
+                    <li>Advanced behavioral analytics</li>
+                    <li>Full API access</li>
+                    <li>Custom integrations & webhooks</li>
                     <li>White-label options</li>
-                    <li>Custom development</li>
-                    <li>24/7 phone support</li>
-                    <li>30-day free trial</li>
+                    <li>24/7 dedicated support</li>
+                    <li>Custom onboarding</li>
+                    <li>60-day free trial</li>
                 </ul>
-                <button class="btn" onclick="selectPlan('enterprise', 999, 15000)">Start Free Trial</button>
+                <button class="btn">Start Free Trial</button>
             </div>
         </div>
 
-        <!-- Payment Methods -->
         <div class="payment-methods">
             <h3>💳 Secure Payment Options</h3>
             <div class="payment-icons">
-                <div class="payment-icon">💳 Stripe</div>
-                <div class="payment-icon">🅿️ PayPal</div>
-                <div class="payment-icon">🍎 Apple Pay</div>
-                <div class="payment-icon">🟢 Google Pay</div>
+                <span class="payment-icon">💳 Stripe</span>
+                <span class="payment-icon">🅿️ PayPal</span>
+                <span class="payment-icon">🍎 Apple Pay</span>
+                <span class="payment-icon">🟢 Google Pay</span>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>VisitorIntel</h4>
+                <p>Professional visitor intelligence and investigation platform for businesses worldwide.</p>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <span>📧</span>
+                        <a href="mailto:support@visitorintel.site">support@visitorintel.site</a>
+                    </div>
+                    <div class="contact-item">
+                        <span>📱</span>
+                        <a href="https://wa.me/639451886246">+639451886246</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="/terms">Terms & Conditions</a></li>
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                    <li><a href="/legal">Legal Information</a></li>
+                    <li><a href="/gdpr">GDPR Compliance</a></li>
+                    <li><a href="/cookies">Cookie Policy</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="/help">Help Center</a></li>
+                    <li><a href="/contact">Contact Us</a></li>
+                    <li><a href="/documentation">Documentation</a></li>
+                    <li><a href="/api">API Reference</a></li>
+                    <li><a href="/status">System Status</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="/careers">Careers</a></li>
+                    <li><a href="/blog">Blog</a></li>
+                    <li><a href="/partners">Partners</a></li>
+                    <li><a href="/security">Security</a></li>
+                </ul>
             </div>
         </div>
 
-        <!-- Features Comparison -->
-        <div class="features-comparison">
-            <h3>📊 Feature Comparison</h3>
-            <table class="comparison-table">
-                <thead>
-                    <tr>
-                        <th>Feature</th>
-                        <th>Starter</th>
-                        <th>Professional</th>
-                        <th>Business</th>
-                        <th>Enterprise</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Monthly Identifications</td>
-                        <td>500</td>
-                        <td>2,500</td>
-                        <td>10,000</td>
-                        <td>15,000</td>
-                    </tr>
-                    <tr>
-                        <td>Cost per Identification</td>
-                        <td>$0.13</td>
-                        <td>$0.06</td>
-                        <td>$0.05</td>
-                        <td>$0.07</td>
-                    </tr>
-                    <tr>
-                        <td>Company Identification</td>
-                        <td class="feature-included">✅</td>
-                        <td class="feature-included">✅</td>
-                        <td class="feature-included">✅</td>
-                        <td class="feature-included">✅</td>
-                    </tr>
-                    <tr>
-                        <td>Contact Information</td>
-                        <td class="feature-not-included">❌</td>
-                        <td class="feature-included">✅</td>
-                        <td class="feature-included">✅</td>
-                        <td class="feature-included">✅</td>
-                    </tr>
-                    <tr>
-                        <td>Real-time Tracking</td>
-                        <td class="feature-not-included">❌</td>
-                        <td class="feature-included">✅</td>
-                        <td class="feature-included">✅</td>
-                        <td class="feature-included">✅</td>
-                    </tr>
-                    <tr>
-                        <td>API Access</td>
-                        <td class="feature-not-included">❌</td>
-                        <td class="feature-not-included">❌</td>
-                        <td class="feature-included">✅</td>
-                        <td class="feature-included">✅</td>
-                    </tr>
-                    <tr>
-                        <td>Custom Integrations</td>
-                        <td class="feature-not-included">❌</td>
-                        <td class="feature-not-included">❌</td>
-                        <td class="feature-included">✅</td>
-                        <td class="feature-included">✅</td>
-                    </tr>
-                    <tr>
-                        <td>White-label Options</td>
-                        <td class="feature-not-included">❌</td>
-                        <td class="feature-not-included">❌</td>
-                        <td class="feature-not-included">❌</td>
-                        <td class="feature-included">✅</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="footer-bottom">
+            <p>&copy; 2025 VisitorIntel. All rights reserved. | Professional visitor intelligence platform.</p>
         </div>
+    </footer>
 
-        <!-- FAQ Section -->
-        <div class="faq-section">
-            <h3>❓ Frequently Asked Questions</h3>
-            
-            <div class="faq-item">
-                <div class="faq-question">What counts as a visitor identification?</div>
-                <div class="faq-answer">Each unique visitor to your website counts as one identification. We track visitors across multiple sessions and provide comprehensive profiles including company information, contact details, and behavioral data.</div>
+    <!-- GDPR Cookie Consent Banner -->
+    <div id="cookie-banner" class="cookie-banner">
+        <div class="cookie-content">
+            <div>
+                <strong>🍪 We use cookies</strong> to enhance your experience and analyze our traffic. 
+                By continuing to use our site, you consent to our use of cookies in accordance with our 
+                <a href="/cookies" style="color: #667eea;">Cookie Policy</a> and 
+                <a href="/privacy" style="color: #667eea;">Privacy Policy</a>.
             </div>
-
-            <div class="faq-item">
-                <div class="faq-question">Can I upgrade or downgrade my plan?</div>
-                <div class="faq-answer">Yes! You can change your plan at any time. Upgrades take effect immediately, while downgrades take effect at the next billing cycle. Unused identifications don't roll over to the next month.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">What happens if I exceed my monthly limit?</div>
-                <div class="faq-answer">If you exceed your monthly identification limit, tracking will pause until the next billing cycle or you can upgrade to a higher plan. We'll notify you when you reach 80% and 100% of your limit.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">Is there a setup fee?</div>
-                <div class="faq-answer">No setup fees! All plans include free setup and onboarding. We'll help you integrate the tracking code and configure your dashboard at no additional cost.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">Can I cancel anytime?</div>
-                <div class="faq-answer">Yes, you can cancel your subscription at any time. Your service will continue until the end of your current billing period, and you'll retain access to your data for 90 days after cancellation.</div>
+            <div class="cookie-buttons">
+                <button class="cookie-btn cookie-accept" onclick="acceptCookies()">Accept All</button>
+                <button class="cookie-btn cookie-decline" onclick="declineCookies()">Decline</button>
+                <button class="cookie-btn cookie-settings" onclick="cookieSettings()">Settings</button>
             </div>
         </div>
     </div>
 
     <script>
-        function selectPlan(planName, price, identifications) {
-            // Show plan selection confirmation
-            const confirmed = confirm(`You selected the ${planName.charAt(0).toUpperCase() + planName.slice(1)} plan:\n\n💰 $${price}/month\n🔍 ${identifications.toLocaleString()} visitor identifications\n\nProceed to start your free trial?`);
-            
-            if (confirmed) {
-                // In a real implementation, this would redirect to payment processing
-                alert(`🎉 Great choice! You'll be redirected to start your free trial for the ${planName.charAt(0).toUpperCase() + planName.slice(1)} plan.\n\nYour trial includes:\n✅ Full access to all features\n✅ ${identifications.toLocaleString()} identifications\n✅ No credit card required\n✅ Cancel anytime`);
-                
-                // Simulate redirect to payment/trial signup
-                // window.location.href = `/signup?plan=${planName}&price=${price}&identifications=${identifications}`;
+        // Show cookie banner on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!localStorage.getItem('cookieConsent')) {
+                document.getElementById('cookie-banner').style.display = 'block';
             }
+        });
+
+        function acceptCookies() {
+            localStorage.setItem('cookieConsent', 'accepted');
+            document.getElementById('cookie-banner').style.display = 'none';
         }
 
-        // Add smooth scrolling for better UX
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
+        function declineCookies() {
+            localStorage.setItem('cookieConsent', 'declined');
+            document.getElementById('cookie-banner').style.display = 'none';
+        }
 
-        // Add animation on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        // Observe all pricing cards
-        document.querySelectorAll('.pricing-card').forEach(card => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(30px)';
-            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(card);
-        });
+        function cookieSettings() {
+            alert('Cookie settings panel would open here');
+        }
     </script>
 </body>
 </html>
