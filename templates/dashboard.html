@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VisitorIntel Dashboard</title>
+    <title>Visitor Intel - Website Traffic Intelligence</title>
+    <link rel="icon" type="image/png" href="/static/favicon.png">
     <style>
         * {
             margin: 0;
@@ -36,9 +37,37 @@
         }
 
         .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             font-size: 1.5rem;
             font-weight: bold;
             color: #333;
+        }
+
+        .nav-brand img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+
+        .nav-brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .nav-brand-main {
+            font-size: 1.4rem;
+            color: #d4af37;
+            font-weight: 800;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .nav-brand-sub {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
         }
 
         .nav-tabs {
@@ -114,6 +143,15 @@
             color: #333;
             margin-bottom: 1.5rem;
             font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2 img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
         }
 
         .stats-grid {
@@ -129,13 +167,13 @@
             border-radius: 15px;
             text-align: center;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #d4af37;
         }
 
         .stat-number {
             font-size: 2.5rem;
             font-weight: bold;
-            color: #667eea;
+            color: #d4af37;
             margin-bottom: 0.5rem;
         }
 
@@ -155,7 +193,7 @@
         }
 
         .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
             color: white;
             border: none;
             padding: 12px 24px;
@@ -171,7 +209,7 @@
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
         }
 
         .investigation-form {
@@ -201,8 +239,8 @@
 
         .form-input:focus, .form-select:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
         }
 
         .form-actions {
@@ -212,7 +250,7 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
         }
 
         .btn-success {
@@ -234,7 +272,7 @@
             border-radius: 15px;
             padding: 1.5rem;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            border-left: 5px solid #667eea;
+            border-left: 5px solid #d4af37;
             transition: all 0.3s ease;
             position: relative;
         }
@@ -360,7 +398,7 @@
         .time-value {
             font-size: 1.5rem;
             font-weight: bold;
-            color: #667eea;
+            color: #d4af37;
         }
 
         .time-label {
@@ -388,7 +426,7 @@
         }
 
         .page-tag {
-            background: #667eea;
+            background: #d4af37;
             color: white;
             padding: 4px 8px;
             border-radius: 12px;
@@ -404,7 +442,7 @@
 
         .loading-spinner {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            border-top: 4px solid #d4af37;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -444,7 +482,7 @@
 
         .form-input:focus, .form-select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #d4af37;
         }
 
         .table {
@@ -475,6 +513,64 @@
             font-weight: bold;
         }
 
+        .footer {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            color: #d4af37;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer-section h3 img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+
+        .footer-section p, .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            line-height: 1.6;
+        }
+
+        .footer-section a:hover {
+            color: #d4af37;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #444;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            text-align: center;
+            color: #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .footer-bottom img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+        }
+
         @media (max-width: 768px) {
             .nav-container {
                 flex-direction: column;
@@ -497,13 +593,28 @@
             .visitor-details {
                 grid-template-columns: 1fr;
             }
+
+            .footer-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .nav-brand-text {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-brand">🔍 VisitorIntel</div>
+            <div class="nav-brand">
+                <img src="/static/logo.png" alt="Visitor Intel Logo">
+                <div class="nav-brand-text">
+                    <div class="nav-brand-main">VISITOR INTEL</div>
+                    <div class="nav-brand-sub">Website Traffic Intelligence</div>
+                </div>
+            </div>
             <div class="nav-tabs">
                 <button class="nav-tab active" onclick="showTab('investigation')">Investigation</button>
                 <button class="nav-tab" onclick="showTab('admin')">Admin Dashboard</button>
@@ -522,7 +633,10 @@
         <div id="investigation" class="tab-content active">
             <!-- Website Investigation Input -->
             <div class="card">
-                <h2>🔍 Website Visitor Investigation</h2>
+                <h2>
+                    <img src="/static/logo.png" alt="Logo">
+                    Website Visitor Investigation
+                </h2>
                 <p>Enter a website URL to investigate current visitors and their detailed profiles.</p>
                 
                 <div class="investigation-form">
@@ -537,14 +651,17 @@
                         </select>
                     </div>
                     <div class="form-actions">
-                        <button class="btn btn-primary" onclick="startInvestigation( )">🚀 Start Investigation</button>
+                        <button class="btn btn-primary" onclick="startInvestigation()">🚀 Start Investigation</button>
                     </div>
                 </div>
             </div>
 
             <!-- Investigation Results -->
             <div class="card">
-                <h2>📊 Live Visitor Intelligence</h2>
+                <h2>
+                    <img src="/static/logo.png" alt="Logo">
+                    Live Visitor Intelligence
+                </h2>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-number" id="total-visitors">0</div>
@@ -585,7 +702,10 @@
         <!-- Admin Dashboard Tab -->
         <div id="admin" class="tab-content">
             <div class="card">
-                <h2>⚙️ Admin Dashboard</h2>
+                <h2>
+                    <img src="/static/logo.png" alt="Logo">
+                    Admin Dashboard
+                </h2>
                 <p>System administration and client management.</p>
                 <!-- Admin content will be loaded here -->
             </div>
@@ -594,7 +714,10 @@
         <!-- Trial Management Tab -->
         <div id="trials" class="tab-content">
             <div class="card">
-                <h2>⏱️ Trial Management</h2>
+                <h2>
+                    <img src="/static/logo.png" alt="Logo">
+                    Trial Management
+                </h2>
                 <p>Manage client trials and access periods.</p>
                 <!-- Trial management content will be loaded here -->
             </div>
@@ -603,12 +726,47 @@
         <!-- User Management Tab -->
         <div id="users" class="tab-content">
             <div class="card">
-                <h2>👥 User Management</h2>
+                <h2>
+                    <img src="/static/logo.png" alt="Logo">
+                    User Management
+                </h2>
                 <p>Manage system users and permissions.</p>
                 <!-- User management content will be loaded here -->
             </div>
         </div>
     </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>
+                    <img src="/static/logo.png" alt="Logo">
+                    Visitor Intel
+                </h3>
+                <p>Advanced website visitor intelligence and traffic analysis platform. Discover who's visiting your website with real-time visitor identification and behavioral analytics.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Features</h3>
+                <p><a href="#">Real-time Visitor Tracking</a></p>
+                <p><a href="#">Contact Information Discovery</a></p>
+                <p><a href="#">Behavioral Analytics</a></p>
+                <p><a href="#">Lead Generation</a></p>
+                <p><a href="#">Export & Integration</a></p>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <p><a href="#">Documentation</a></p>
+                <p><a href="#">API Reference</a></p>
+                <p><a href="#">Contact Support</a></p>
+                <p><a href="#">Privacy Policy</a></p>
+                <p><a href="#">Terms of Service</a></p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <img src="/static/logo.png" alt="Logo">
+            <span>&copy; 2024 Visitor Intel. All rights reserved. | Website Traffic Intelligence Platform</span>
+        </div>
+    </footer>
 
     <script>
         let visitors = [];
@@ -855,3 +1013,4 @@
     </script>
 </body>
 </html>
+
