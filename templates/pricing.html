@@ -3,557 +3,607 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visitor Identification Pricing - Professional Plans</title>
+    <title>Pricing Plans - Visitor Investigation System</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            min-height: 100vh; 
-            padding: 20px; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .container { 
-            max-width: 1400px; 
-            margin: 0 auto; 
-            background: white; 
-            border-radius: 15px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
-            overflow: hidden; 
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
         }
-        .header { 
-            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%); 
-            color: white; 
-            padding: 40px; 
-            text-align: center; 
+
+        /* Navigation Bar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
-        .header h1 { 
-            font-size: 2.8rem; 
-            margin-bottom: 15px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 15px; 
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        .header p { 
-            font-size: 1.3rem; 
-            opacity: 0.9; 
-            margin-bottom: 10px; 
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
         }
-        .header .subtitle { 
-            font-size: 1.1rem; 
-            opacity: 0.8; 
-            color: #ffd700; 
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
         }
-        .plans-container { 
-            padding: 50px 40px; 
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
-        .plans-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
-            gap: 30px; 
-            margin-top: 30px; 
+
+        .nav-links a:hover, .nav-links a.active {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
         }
-        .plan-card { 
-            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%); 
-            border: 3px solid #e2e8f0; 
-            border-radius: 20px; 
-            padding: 35px; 
-            position: relative; 
-            transition: all 0.3s; 
-            text-align: center; 
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
         }
-        .plan-card:hover { 
-            transform: translateY(-8px); 
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15); 
-            border-color: #667eea; 
+
+        .hero {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
         }
-        .plan-card.popular { 
-            border-color: #667eea; 
-            transform: scale(1.05); 
-            background: linear-gradient(135deg, #f0f4ff 0%, #e6f0ff 100%); 
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
-        .plan-card.popular::before { 
-            content: '🔥 Most Popular'; 
-            position: absolute; 
-            top: -15px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            color: white; 
-            padding: 10px 25px; 
-            border-radius: 25px; 
-            font-size: 0.9rem; 
-            font-weight: 700; 
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); 
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
         }
-        .plan-icon { 
-            font-size: 3rem; 
-            margin-bottom: 20px; 
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
         }
-        .plan-name { 
-            font-size: 1.8rem; 
-            font-weight: bold; 
-            color: #2d3748; 
-            margin-bottom: 10px; 
+
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+            transition: transform 0.3s ease;
         }
-        .plan-identifications { 
-            font-size: 2.2rem; 
-            font-weight: bold; 
-            color: #667eea; 
-            margin-bottom: 5px; 
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
         }
-        .plan-identifications-label { 
-            color: #4a5568; 
-            font-size: 1rem; 
-            margin-bottom: 20px; 
+
+        .pricing-card.popular {
+            border: 3px solid #667eea;
+            transform: scale(1.05);
         }
-        .plan-price { 
-            display: flex; 
-            align-items: baseline; 
-            justify-content: center; 
-            gap: 5px; 
-            margin-bottom: 25px; 
+
+        .popular-badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
         }
-        .price-currency { 
-            font-size: 1.5rem; 
-            color: #4a5568; 
-            font-weight: 600; 
+
+        .plan-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 1rem;
         }
-        .price-amount { 
-            font-size: 3.5rem; 
-            font-weight: bold; 
-            color: #2d3748; 
+
+        .plan-price {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
         }
-        .price-period { 
-            font-size: 1.2rem; 
-            color: #4a5568; 
-            font-weight: 600; 
+
+        .plan-period {
+            color: #666;
+            margin-bottom: 1rem;
         }
-        .price-per-id { 
-            background: #e6fffa; 
-            color: #234e52; 
-            padding: 8px 15px; 
-            border-radius: 20px; 
-            font-size: 0.9rem; 
-            font-weight: 600; 
-            margin-bottom: 25px; 
-            display: inline-block; 
+
+        .plan-description {
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
         }
-        .plan-features { 
-            list-style: none; 
-            margin-bottom: 30px; 
-            text-align: left; 
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 2rem;
+            text-align: left;
         }
-        .plan-features li { 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            padding: 10px 0; 
-            color: #4a5568; 
-            font-size: 1rem; 
+
+        .plan-features li {
+            padding: 0.5rem 0;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-        .plan-features li::before { 
-            content: '✅'; 
-            font-size: 1.1rem; 
-            flex-shrink: 0; 
+
+        .plan-features li::before {
+            content: "✅";
+            font-size: 1rem;
         }
-        .plan-features .highlight { 
-            color: #2d3748; 
-            font-weight: 600; 
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            width: 100%;
         }
-        .payment-methods { 
-            display: flex; 
-            gap: 12px; 
-            margin-bottom: 20px; 
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
         }
-        .payment-btn { 
-            flex: 1; 
-            padding: 16px 20px; 
-            border: 2px solid #e2e8f0; 
-            border-radius: 12px; 
-            background: white; 
-            cursor: pointer; 
-            transition: all 0.3s; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 8px; 
-            font-weight: 600; 
-            font-size: 0.95rem; 
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
         }
-        .payment-btn:hover { 
-            border-color: #667eea; 
-            background: #f7fafc; 
-            transform: translateY(-2px); 
+
+        .payment-methods {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 2rem;
         }
-        .payment-btn.stripe { 
-            color: #635bff; 
+
+        .payment-methods h3 {
+            color: #333;
+            margin-bottom: 1rem;
         }
-        .payment-btn.paypal { 
-            color: #0070ba; 
+
+        .payment-icons {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
         }
-        .trial-info { 
-            background: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%); 
-            color: #1a365d; 
-            padding: 15px; 
-            border-radius: 12px; 
-            text-align: center; 
-            font-size: 0.95rem; 
-            font-weight: 600; 
-            margin-bottom: 20px; 
+
+        .payment-icon {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            min-width: 120px;
         }
-        .guarantee { 
-            text-align: center; 
-            color: #4a5568; 
-            font-size: 1rem; 
-            margin-top: 40px; 
-            padding: 20px; 
-            background: #f7fafc; 
-            border-radius: 12px; 
+
+        .features-comparison {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
         }
-        .features-highlight { 
-            background: #f0fff4; 
-            border: 2px solid #9ae6b4; 
-            border-radius: 12px; 
-            padding: 20px; 
-            margin: 30px 0; 
-            text-align: center; 
+
+        .features-comparison h3 {
+            color: #333;
+            margin-bottom: 2rem;
+            text-align: center;
         }
-        .features-highlight h3 { 
-            color: #22543d; 
-            margin-bottom: 15px; 
-            font-size: 1.3rem; 
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
         }
-        .features-highlight p { 
-            color: #2f855a; 
-            font-size: 1rem; 
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 1px solid #e1e5e9;
         }
-        @media (max-width: 768px) { 
-            .plans-grid { 
-                grid-template-columns: 1fr; 
+
+        .comparison-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .comparison-table td {
+            color: #666;
+        }
+
+        .feature-included {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .feature-not-included {
+            color: #e74c3c;
+        }
+
+        .faq-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .faq-section h3 {
+            color: #333;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .faq-item {
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e1e5e9;
+            padding-bottom: 1rem;
+        }
+
+        .faq-question {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .faq-answer {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                flex-direction: column;
+                gap: 1rem;
             }
-            .plan-card.popular { 
-                transform: none; 
+
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
             }
-            .payment-methods { 
-                flex-direction: column; 
+
+            .hero h1 {
+                font-size: 2rem;
             }
-            .header h1 { 
-                font-size: 2.2rem; 
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
             }
-            .price-amount { 
-                font-size: 2.8rem; 
+
+            .pricing-card.popular {
+                transform: none;
+            }
+
+            .payment-icons {
+                gap: 1rem;
+            }
+
+            .container {
+                padding: 0 1rem;
             }
         }
     </style>
-    <script src="https://js.stripe.com/v3/"></script>
-    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&vault=true&intent=subscription"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🔍 Visitor Identification Pricing</h1>
-            <p>Professional visitor tracking and identification services</p>
-            <p class="subtitle">Identify your website visitors with precision and grow your business</p>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">🔍 Visitor Investigation</a>
+            <ul class="nav-links">
+                <li><a href="/">Investigation</a></li>
+                <li><a href="/admin">Admin Dashboard</a></li>
+                <li><a href="/admin/trials">Trial Management</a></li>
+                <li><a href="/admin/users">User Management</a></li>
+                <li><a href="/pricing" class="active">Pricing</a></li>
+            </ul>
         </div>
-        
-        <div class="plans-container">
-            <div class="features-highlight">
-                <h3>🎯 What You Get With Every Plan</h3>
-                <p>Complete visitor profiles • Real-time tracking • Geographic data • Device information • Browsing behavior • Export capabilities • API access • 24/7 support</p>
+    </nav>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>🔍 Visitor Identification Pricing</h1>
+            <p>Choose the perfect plan for your visitor investigation needs. Get detailed insights about every visitor to your website.</p>
+        </div>
+
+        <!-- Pricing Plans -->
+        <div class="pricing-grid">
+            <!-- Starter Plan -->
+            <div class="pricing-card">
+                <div class="plan-name">Starter</div>
+                <div class="plan-price">$67</div>
+                <div class="plan-period">per month</div>
+                <div class="plan-description">Perfect for small businesses getting started with visitor identification</div>
+                <ul class="plan-features">
+                    <li>500 visitor identifications</li>
+                    <li>Basic visitor profiles</li>
+                    <li>Company identification</li>
+                    <li>Location tracking</li>
+                    <li>Email support</li>
+                    <li>7-day free trial</li>
+                </ul>
+                <button class="btn" onclick="selectPlan('starter', 67, 500)">Start Free Trial</button>
             </div>
-            
-            <div class="plans-grid">
-                <!-- Starter Plan -->
-                <div class="plan-card">
-                    <div class="plan-icon">🚀</div>
-                    <div class="plan-name">Starter</div>
-                    <div class="plan-identifications">500</div>
-                    <div class="plan-identifications-label">visitor identifications</div>
-                    
-                    <div class="plan-price">
-                        <span class="price-currency">$</span>
-                        <span class="price-amount">67</span>
-                        <span class="price-period">/month</span>
-                    </div>
-                    
-                    <div class="price-per-id">$0.13 per identification</div>
-                    
-                    <ul class="plan-features">
-                        <li><span class="highlight">500 visitor identifications</span></li>
-                        <li>Real-time visitor tracking</li>
-                        <li>Complete visitor profiles</li>
-                        <li>Geographic location data</li>
-                        <li>Device & browser information</li>
-                        <li>Time on site tracking</li>
-                        <li>Pages visited history</li>
-                        <li>CSV export capabilities</li>
-                        <li>Email support</li>
-                        <li>Basic API access</li>
-                    </ul>
-                    
-                    <div class="trial-info">
-                        🎯 Start with a 7-day free trial
-                    </div>
-                    
-                    <div class="payment-methods">
-                        <button class="payment-btn stripe" onclick="selectPayment('starter', 'stripe')">
-                            💳 Pay with Stripe
-                        </button>
-                        <button class="payment-btn paypal" onclick="selectPayment('starter', 'paypal')">
-                            🅿️ Pay with PayPal
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Professional Plan -->
-                <div class="plan-card popular">
-                    <div class="plan-icon">💼</div>
-                    <div class="plan-name">Professional</div>
-                    <div class="plan-identifications">2,500</div>
-                    <div class="plan-identifications-label">visitor identifications</div>
-                    
-                    <div class="plan-price">
-                        <span class="price-currency">$</span>
-                        <span class="price-amount">147</span>
-                        <span class="price-period">/month</span>
-                    </div>
-                    
-                    <div class="price-per-id">$0.06 per identification</div>
-                    
-                    <ul class="plan-features">
-                        <li><span class="highlight">2,500 visitor identifications</span></li>
-                        <li>Everything in Starter plan</li>
-                        <li>Advanced visitor analytics</li>
-                        <li>Interest level scoring</li>
-                        <li>Country-based filtering</li>
-                        <li>Excel & CSV exports</li>
-                        <li>Priority email support</li>
-                        <li>Full API access</li>
-                        <li>Custom reports</li>
-                        <li>Webhook notifications</li>
-                        <li>Multiple user accounts</li>
-                    </ul>
-                    
-                    <div class="trial-info">
-                        🚀 Start with a 14-day free trial
-                    </div>
-                    
-                    <div class="payment-methods">
-                        <button class="payment-btn stripe" onclick="selectPayment('professional', 'stripe')">
-                            💳 Pay with Stripe
-                        </button>
-                        <button class="payment-btn paypal" onclick="selectPayment('professional', 'paypal')">
-                            🅿️ Pay with PayPal
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Business Plan -->
-                <div class="plan-card">
-                    <div class="plan-icon">🏢</div>
-                    <div class="plan-name">Business</div>
-                    <div class="plan-identifications">10,000</div>
-                    <div class="plan-identifications-label">visitor identifications</div>
-                    
-                    <div class="plan-price">
-                        <span class="price-currency">$</span>
-                        <span class="price-amount">499</span>
-                        <span class="price-period">/month</span>
-                    </div>
-                    
-                    <div class="price-per-id">$0.05 per identification</div>
-                    
-                    <ul class="plan-features">
-                        <li><span class="highlight">10,000 visitor identifications</span></li>
-                        <li>Everything in Professional plan</li>
-                        <li>Advanced segmentation</li>
-                        <li>Custom visitor scoring</li>
-                        <li>Bulk data exports</li>
-                        <li>Phone & email support</li>
-                        <li>Dedicated account manager</li>
-                        <li>Custom integrations</li>
-                        <li>White-label options</li>
-                        <li>Advanced API features</li>
-                        <li>Team collaboration tools</li>
-                        <li>Custom training session</li>
-                    </ul>
-                    
-                    <div class="trial-info">
-                        🏆 Start with a 21-day free trial
-                    </div>
-                    
-                    <div class="payment-methods">
-                        <button class="payment-btn stripe" onclick="selectPayment('business', 'stripe')">
-                            💳 Pay with Stripe
-                        </button>
-                        <button class="payment-btn paypal" onclick="selectPayment('business', 'paypal')">
-                            🅿️ Pay with PayPal
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Enterprise Plan -->
-                <div class="plan-card">
-                    <div class="plan-icon">🏆</div>
-                    <div class="plan-name">Enterprise</div>
-                    <div class="plan-identifications">15,000</div>
-                    <div class="plan-identifications-label">visitor identifications</div>
-                    
-                    <div class="plan-price">
-                        <span class="price-currency">$</span>
-                        <span class="price-amount">999</span>
-                        <span class="price-period">/month</span>
-                    </div>
-                    
-                    <div class="price-per-id">$0.07 per identification</div>
-                    
-                    <ul class="plan-features">
-                        <li><span class="highlight">15,000 visitor identifications</span></li>
-                        <li>Everything in Business plan</li>
-                        <li>Enterprise-grade security</li>
-                        <li>Custom data retention</li>
-                        <li>Advanced compliance features</li>
-                        <li>24/7 priority support</li>
-                        <li>Dedicated infrastructure</li>
-                        <li>Custom development</li>
-                        <li>SLA guarantees</li>
-                        <li>Advanced reporting suite</li>
-                        <li>Multi-location support</li>
-                        <li>Executive training program</li>
-                    </ul>
-                    
-                    <div class="trial-info">
-                        💎 Start with a 30-day free trial
-                    </div>
-                    
-                    <div class="payment-methods">
-                        <button class="payment-btn stripe" onclick="selectPayment('enterprise', 'stripe')">
-                            💳 Pay with Stripe
-                        </button>
-                        <button class="payment-btn paypal" onclick="selectPayment('enterprise', 'paypal')">
-                            🅿️ Pay with PayPal
-                        </button>
-                    </div>
-                </div>
+
+            <!-- Professional Plan -->
+            <div class="pricing-card popular">
+                <div class="popular-badge">🔥 Most Popular</div>
+                <div class="plan-name">Professional</div>
+                <div class="plan-price">$147</div>
+                <div class="plan-period">per month</div>
+                <div class="plan-description">Ideal for growing businesses that need comprehensive visitor insights</div>
+                <ul class="plan-features">
+                    <li>2,500 visitor identifications</li>
+                    <li>Advanced visitor profiles</li>
+                    <li>Company & contact details</li>
+                    <li>Behavioral analytics</li>
+                    <li>Real-time tracking</li>
+                    <li>Excel/CSV exports</li>
+                    <li>Priority support</li>
+                    <li>14-day free trial</li>
+                </ul>
+                <button class="btn" onclick="selectPlan('professional', 147, 2500)">Start Free Trial</button>
             </div>
+
+            <!-- Business Plan -->
+            <div class="pricing-card">
+                <div class="plan-name">Business</div>
+                <div class="plan-price">$499</div>
+                <div class="plan-period">per month</div>
+                <div class="plan-description">For established businesses requiring extensive visitor intelligence</div>
+                <ul class="plan-features">
+                    <li>10,000 visitor identifications</li>
+                    <li>Premium visitor profiles</li>
+                    <li>Full contact information</li>
+                    <li>Advanced analytics</li>
+                    <li>API access</li>
+                    <li>Custom integrations</li>
+                    <li>Dedicated support</li>
+                    <li>30-day free trial</li>
+                </ul>
+                <button class="btn" onclick="selectPlan('business', 499, 10000)">Start Free Trial</button>
+            </div>
+
+            <!-- Enterprise Plan -->
+            <div class="pricing-card">
+                <div class="plan-name">Enterprise</div>
+                <div class="plan-price">$999</div>
+                <div class="plan-period">per month</div>
+                <div class="plan-description">Maximum visitor identification capacity for large organizations</div>
+                <ul class="plan-features">
+                    <li>15,000 visitor identifications</li>
+                    <li>Enterprise visitor profiles</li>
+                    <li>Complete visitor intelligence</li>
+                    <li>Advanced reporting</li>
+                    <li>White-label options</li>
+                    <li>Custom development</li>
+                    <li>24/7 phone support</li>
+                    <li>30-day free trial</li>
+                </ul>
+                <button class="btn" onclick="selectPlan('enterprise', 999, 15000)">Start Free Trial</button>
+            </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="payment-methods">
+            <h3>💳 Secure Payment Options</h3>
+            <div class="payment-icons">
+                <div class="payment-icon">💳 Stripe</div>
+                <div class="payment-icon">🅿️ PayPal</div>
+                <div class="payment-icon">🍎 Apple Pay</div>
+                <div class="payment-icon">🟢 Google Pay</div>
+            </div>
+        </div>
+
+        <!-- Features Comparison -->
+        <div class="features-comparison">
+            <h3>📊 Feature Comparison</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Starter</th>
+                        <th>Professional</th>
+                        <th>Business</th>
+                        <th>Enterprise</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Monthly Identifications</td>
+                        <td>500</td>
+                        <td>2,500</td>
+                        <td>10,000</td>
+                        <td>15,000</td>
+                    </tr>
+                    <tr>
+                        <td>Cost per Identification</td>
+                        <td>$0.13</td>
+                        <td>$0.06</td>
+                        <td>$0.05</td>
+                        <td>$0.07</td>
+                    </tr>
+                    <tr>
+                        <td>Company Identification</td>
+                        <td class="feature-included">✅</td>
+                        <td class="feature-included">✅</td>
+                        <td class="feature-included">✅</td>
+                        <td class="feature-included">✅</td>
+                    </tr>
+                    <tr>
+                        <td>Contact Information</td>
+                        <td class="feature-not-included">❌</td>
+                        <td class="feature-included">✅</td>
+                        <td class="feature-included">✅</td>
+                        <td class="feature-included">✅</td>
+                    </tr>
+                    <tr>
+                        <td>Real-time Tracking</td>
+                        <td class="feature-not-included">❌</td>
+                        <td class="feature-included">✅</td>
+                        <td class="feature-included">✅</td>
+                        <td class="feature-included">✅</td>
+                    </tr>
+                    <tr>
+                        <td>API Access</td>
+                        <td class="feature-not-included">❌</td>
+                        <td class="feature-not-included">❌</td>
+                        <td class="feature-included">✅</td>
+                        <td class="feature-included">✅</td>
+                    </tr>
+                    <tr>
+                        <td>Custom Integrations</td>
+                        <td class="feature-not-included">❌</td>
+                        <td class="feature-not-included">❌</td>
+                        <td class="feature-included">✅</td>
+                        <td class="feature-included">✅</td>
+                    </tr>
+                    <tr>
+                        <td>White-label Options</td>
+                        <td class="feature-not-included">❌</td>
+                        <td class="feature-not-included">❌</td>
+                        <td class="feature-not-included">❌</td>
+                        <td class="feature-included">✅</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="faq-section">
+            <h3>❓ Frequently Asked Questions</h3>
             
-            <div class="guarantee">
-                🛡️ 30-day money-back guarantee • 🔒 Secure payments • 📞 24/7 support • 🚀 Instant setup
-                <br><br>
-                <strong>Need more identifications?</strong> Contact us for custom enterprise pricing with volume discounts.
+            <div class="faq-item">
+                <div class="faq-question">What counts as a visitor identification?</div>
+                <div class="faq-answer">Each unique visitor to your website counts as one identification. We track visitors across multiple sessions and provide comprehensive profiles including company information, contact details, and behavioral data.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Can I upgrade or downgrade my plan?</div>
+                <div class="faq-answer">Yes! You can change your plan at any time. Upgrades take effect immediately, while downgrades take effect at the next billing cycle. Unused identifications don't roll over to the next month.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">What happens if I exceed my monthly limit?</div>
+                <div class="faq-answer">If you exceed your monthly identification limit, tracking will pause until the next billing cycle or you can upgrade to a higher plan. We'll notify you when you reach 80% and 100% of your limit.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Is there a setup fee?</div>
+                <div class="faq-answer">No setup fees! All plans include free setup and onboarding. We'll help you integrate the tracking code and configure your dashboard at no additional cost.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Can I cancel anytime?</div>
+                <div class="faq-answer">Yes, you can cancel your subscription at any time. Your service will continue until the end of your current billing period, and you'll retain access to your data for 90 days after cancellation.</div>
             </div>
         </div>
     </div>
 
     <script>
-        const plans = {
-            starter: { identifications: 500, price: 67 },
-            professional: { identifications: 2500, price: 147 },
-            business: { identifications: 10000, price: 499 },
-            enterprise: { identifications: 15000, price: 999 }
+        function selectPlan(planName, price, identifications) {
+            // Show plan selection confirmation
+            const confirmed = confirm(`You selected the ${planName.charAt(0).toUpperCase() + planName.slice(1)} plan:\n\n💰 $${price}/month\n🔍 ${identifications.toLocaleString()} visitor identifications\n\nProceed to start your free trial?`);
+            
+            if (confirmed) {
+                // In a real implementation, this would redirect to payment processing
+                alert(`🎉 Great choice! You'll be redirected to start your free trial for the ${planName.charAt(0).toUpperCase() + planName.slice(1)} plan.\n\nYour trial includes:\n✅ Full access to all features\n✅ ${identifications.toLocaleString()} identifications\n✅ No credit card required\n✅ Cancel anytime`);
+                
+                // Simulate redirect to payment/trial signup
+                // window.location.href = `/signup?plan=${planName}&price=${price}&identifications=${identifications}`;
+            }
+        }
+
+        // Add smooth scrolling for better UX
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Add animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
         };
 
-        function selectPayment(planId, provider) {
-            const plan = plans[planId];
-            
-            if (provider === 'stripe') {
-                initiateStripePayment(planId, plan);
-            } else if (provider === 'paypal') {
-                initiatePayPalPayment(planId, plan);
-            }
-        }
-
-        async function initiateStripePayment(planId, plan) {
-            try {
-                const button = event.target;
-                const originalText = button.innerHTML;
-                button.innerHTML = '⏳ Processing...';
-                button.disabled = true;
-                
-                const response = await fetch('/api/create-stripe-subscription', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        plan_id: planId,
-                        identifications: plan.identifications,
-                        amount: plan.price,
-                        client_id: 'demo_client_id'
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    const stripe = Stripe('pk_test_your_stripe_publishable_key');
-                    const { error } = await stripe.confirmCardPayment(result.client_secret);
-                    
-                    if (error) {
-                        alert('Payment failed: ' + error.message);
-                    } else {
-                        alert(`Payment successful! Welcome to ${plan.identifications} visitor identifications per month!`);
-                        window.location.href = '/dashboard';
-                    }
-                } else {
-                    alert('Error: ' + result.error);
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
                 }
-                
-                button.innerHTML = originalText;
-                button.disabled = false;
-                
-            } catch (error) {
-                console.error('Payment error:', error);
-                alert('Payment failed. Please try again.');
-                
-                const button = event.target;
-                button.innerHTML = '💳 Pay with Stripe';
-                button.disabled = false;
-            }
-        }
+            });
+        }, observerOptions);
 
-        async function initiatePayPalPayment(planId, plan) {
-            try {
-                const button = event.target;
-                const originalText = button.innerHTML;
-                button.innerHTML = '⏳ Processing...';
-                button.disabled = true;
-                
-                const response = await fetch('/api/create-paypal-subscription', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        plan_id: planId,
-                        identifications: plan.identifications,
-                        amount: plan.price,
-                        client_id: 'demo_client_id',
-                        return_url: window.location.origin + '/payment/paypal/success',
-                        cancel_url: window.location.origin + '/payment/paypal/cancel'
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    window.location.href = result.approval_url;
-                } else {
-                    alert('Error: ' + result.error);
-                    button.innerHTML = originalText;
-                    button.disabled = false;
-                }
-                
-            } catch (error) {
-                console.error('Payment error:', error);
-                alert('Payment failed. Please try again.');
-                
-                const button = event.target;
-                button.innerHTML = '🅿️ Pay with PayPal';
-                button.disabled = false;
-            }
-        }
+        // Observe all pricing cards
+        document.querySelectorAll('.pricing-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
     </script>
 </body>
 </html>

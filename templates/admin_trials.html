@@ -3,767 +3,645 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trial Management - Admin Dashboard</title>
+    <title>Trial Management - Visitor Investigation System</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            min-height: 100vh; 
-            padding: 20px; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .container { 
-            max-width: 1600px; 
-            margin: 0 auto; 
-            background: white; 
-            border-radius: 15px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
-            overflow: hidden; 
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
         }
-        .header { 
-            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%); 
-            color: white; 
-            padding: 30px 40px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+
+        /* Navigation Bar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
-        .header h1 { 
-            font-size: 2rem; 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        .main-content { 
-            padding: 40px; 
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
         }
-        .action-bar { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 30px; 
-            padding: 20px; 
-            background: #f8f9fa; 
-            border-radius: 12px; 
-            border: 2px solid #e9ecef; 
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
         }
-        .btn { 
-            padding: 12px 24px; 
-            border: none; 
-            border-radius: 8px; 
-            font-weight: 600; 
-            cursor: pointer; 
-            transition: all 0.3s; 
-            text-decoration: none; 
-            display: inline-flex; 
-            align-items: center; 
-            gap: 8px; 
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
-        .btn-primary { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            color: white; 
+
+        .nav-links a:hover, .nav-links a.active {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
         }
-        .btn-success { 
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); 
-            color: white; 
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
         }
-        .btn-warning { 
-            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%); 
-            color: white; 
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
         }
-        .btn-danger { 
-            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%); 
-            color: white; 
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
         }
-        .btn-small { 
-            padding: 6px 12px; 
-            font-size: 0.8rem; 
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.5rem 0.5rem 0.5rem 0;
         }
-        .btn:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
         }
-        .stats-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-            gap: 20px; 
-            margin-bottom: 30px; 
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
         }
-        .stat-card { 
-            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%); 
-            border: 2px solid #e2e8f0; 
-            border-radius: 12px; 
-            padding: 25px; 
-            text-align: center; 
-            position: relative; 
-            overflow: hidden; 
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
         }
-        .stat-card::before { 
-            content: ''; 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            right: 0; 
-            height: 4px; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
         }
-        .stat-number { 
-            font-size: 2.5rem; 
-            font-weight: bold; 
-            color: #2d3748; 
-            margin-bottom: 10px; 
+
+        .form-group {
+            margin-bottom: 1.5rem;
         }
-        .stat-label { 
-            color: #4a5568; 
-            font-size: 1rem; 
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
         }
-        .trials-table { 
-            background: white; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
         }
-        .table-header { 
-            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); 
-            color: white; 
-            padding: 20px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
         }
-        .table-content { 
-            overflow-x: auto; 
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
         }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
+
+        .trial-list {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
-        th, td { 
-            padding: 15px; 
-            text-align: left; 
-            border-bottom: 1px solid #e2e8f0; 
+
+        .trial-item {
+            padding: 1.5rem;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        th { 
-            background: #f8f9fa; 
-            font-weight: 600; 
-            color: #4a5568; 
+
+        .trial-item:last-child {
+            border-bottom: none;
         }
-        tr:hover { 
-            background: #f8f9fa; 
+
+        .trial-info h4 {
+            color: #333;
+            margin-bottom: 0.5rem;
         }
-        .status-badge { 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 0.8rem; 
-            font-weight: 600; 
+
+        .trial-info p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
         }
-        .status-active { 
-            background: #c6f6d5; 
-            color: #22543d; 
+
+        .trial-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
-        .status-expired { 
-            background: #fed7d7; 
-            color: #c53030; 
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
         }
-        .status-converted { 
-            background: #bee3f8; 
-            color: #2c5282; 
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
         }
-        .time-remaining { 
-            font-weight: 600; 
+
+        .status-expired {
+            background: #f8d7da;
+            color: #721c24;
         }
-        .time-expired { 
-            color: #e53e3e; 
+
+        .status-expiring {
+            background: #fff3cd;
+            color: #856404;
         }
-        .time-warning { 
-            color: #dd6b20; 
+
+        .time-remaining {
+            font-weight: bold;
+            color: #667eea;
         }
-        .time-good { 
-            color: #38a169; 
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
-        .modal { 
-            display: none; 
-            position: fixed; 
-            z-index: 1000; 
-            left: 0; 
-            top: 0; 
-            width: 100%; 
-            height: 100%; 
-            background-color: rgba(0,0,0,0.5); 
+
+        .quick-action-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease;
         }
-        .modal-content { 
-            background-color: white; 
-            margin: 5% auto; 
-            padding: 30px; 
-            border-radius: 12px; 
-            width: 90%; 
-            max-width: 500px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2); 
+
+        .quick-action-card:hover {
+            transform: translateY(-5px);
         }
-        .modal-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 20px; 
+
+        .quick-action-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
         }
-        .close { 
-            color: #aaa; 
-            font-size: 28px; 
-            font-weight: bold; 
-            cursor: pointer; 
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 1px solid #c3e6cb;
         }
-        .close:hover { 
-            color: #000; 
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 1px solid #f5c6cb;
         }
-        .form-group { 
-            margin-bottom: 20px; 
-        }
-        .form-group label { 
-            display: block; 
-            margin-bottom: 8px; 
-            font-weight: 600; 
-            color: #4a5568; 
-        }
-        .form-group input, .form-group select { 
-            width: 100%; 
-            padding: 12px; 
-            border: 2px solid #e2e8f0; 
-            border-radius: 8px; 
-            font-size: 1rem; 
-        }
-        .duration-presets { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); 
-            gap: 10px; 
-            margin-top: 10px; 
-        }
-        .preset-btn { 
-            padding: 8px 12px; 
-            border: 2px solid #e2e8f0; 
-            background: white; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            text-align: center; 
-            font-size: 0.9rem; 
-            transition: all 0.3s; 
-        }
-        .preset-btn:hover, .preset-btn.active { 
-            border-color: #667eea; 
-            background: #667eea; 
-            color: white; 
-        }
-        .success-message { 
-            background: #c6f6d5; 
-            color: #22543d; 
-            padding: 15px; 
-            border-radius: 8px; 
-            margin-bottom: 20px; 
-            border: 1px solid #9ae6b4; 
-        }
-        .error-message { 
-            background: #fed7d7; 
-            color: #c53030; 
-            padding: 15px; 
-            border-radius: 8px; 
-            margin-bottom: 20px; 
-            border: 1px solid #feb2b2; 
-        }
-        @media (max-width: 768px) { 
-            .header { 
-                flex-direction: column; 
-                gap: 20px; 
-                text-align: center; 
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                flex-direction: column;
+                gap: 1rem;
             }
-            .action-bar { 
-                flex-direction: column; 
-                gap: 15px; 
+
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
             }
-            .stats-grid { 
-                grid-template-columns: 1fr; 
+
+            .form-row {
+                grid-template-columns: 1fr;
             }
-            .table-content { 
-                font-size: 0.9rem; 
+
+            .trial-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .container {
+                padding: 0 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🕐 Trial Management</h1>
-            <div>
-                <a href="/admin" class="btn btn-primary">← Admin Dashboard</a>
-            </div>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">🔍 Visitor Investigation</a>
+            <ul class="nav-links">
+                <li><a href="/">Investigation</a></li>
+                <li><a href="/admin">Admin Dashboard</a></li>
+                <li><a href="/admin/trials" class="active">Trial Management</a></li>
+                <li><a href="/admin/users">User Management</a></li>
+                <li><a href="/pricing">Pricing</a></li>
+            </ul>
         </div>
-        
-        <div class="main-content">
-            <div class="action-bar">
-                <h2>Manage Trial Accounts</h2>
-                <button class="btn btn-primary" onclick="openCreateTrialModal()">
-                    ➕ Create New Trial
-                </button>
-            </div>
-            
-            <div class="stats-grid" id="stats-grid">
-                <!-- Stats will be populated by JavaScript -->
-            </div>
-            
-            <div class="trials-table">
-                <div class="table-header">
-                    <h3>📊 All Trial Accounts</h3>
-                    <button class="btn btn-primary btn-small" onclick="loadTrials()">
-                        🔄 Refresh
-                    </button>
-                </div>
-                <div class="table-content">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Business</th>
-                                <th>Email</th>
-                                <th>Duration</th>
-                                <th>Time Remaining</th>
-                                <th>Status</th>
-                                <th>Extensions</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="trials-tbody">
-                            <!-- Trials will be populated by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+    </nav>
 
-    <!-- Create Trial Modal -->
-    <div id="createTrialModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Create New Trial</h2>
-                <span class="close" onclick="closeCreateTrialModal()">&times;</span>
+    <div class="container">
+        <!-- Quick Actions -->
+        <div class="card">
+            <h2>⚡ Quick Trial Actions</h2>
+            <div class="quick-actions">
+                <div class="quick-action-card" onclick="showCreateTrialForm('3')">
+                    <div class="quick-action-icon">⏰</div>
+                    <h4>3 Hour Trial</h4>
+                    <p>Quick demo access</p>
+                </div>
+                <div class="quick-action-card" onclick="showCreateTrialForm('24')">
+                    <div class="quick-action-icon">📅</div>
+                    <h4>24 Hour Trial</h4>
+                    <p>Standard trial period</p>
+                </div>
+                <div class="quick-action-card" onclick="showCreateTrialForm('120')">
+                    <div class="quick-action-icon">📆</div>
+                    <h4>5 Day Trial</h4>
+                    <p>Extended evaluation</p>
+                </div>
+                <div class="quick-action-card" onclick="showCreateTrialForm('168')">
+                    <div class="quick-action-icon">🗓️</div>
+                    <h4>7 Day Trial</h4>
+                    <p>Full week access</p>
+                </div>
             </div>
+        </div>
+
+        <!-- Create Trial Form -->
+        <div class="card">
+            <h2>➕ Create New Trial</h2>
             <form id="createTrialForm">
-                <div class="form-group">
-                    <label for="business_name">Business Name:</label>
-                    <input type="text" id="business_name" name="business_name" required placeholder="e.g., Acme Roofing Company">
-                </div>
-                
-                <div class="form-group">
-                    <label for="contact_email">Contact Email:</label>
-                    <input type="email" id="contact_email" name="contact_email" required placeholder="e.g., owner@acmeroofing.com">
-                </div>
-                
-                <div class="form-group">
-                    <label for="website_url">Website URL:</label>
-                    <input type="url" id="website_url" name="website_url" required placeholder="e.g., https://acmeroofing.com">
-                </div>
-                
-                <div class="form-group">
-                    <label for="duration_hours">Trial Duration (hours):</label>
-                    <input type="number" id="duration_hours" name="duration_hours" min="1" max="8760" value="24" required>
-                    
-                    <div class="duration-presets">
-                        <div class="preset-btn" onclick="setDuration(3)">3 Hours</div>
-                        <div class="preset-btn" onclick="setDuration(24)">1 Day</div>
-                        <div class="preset-btn" onclick="setDuration(72)">3 Days</div>
-                        <div class="preset-btn" onclick="setDuration(120)">5 Days</div>
-                        <div class="preset-btn" onclick="setDuration(168)">1 Week</div>
-                        <div class="preset-btn" onclick="setDuration(720)">30 Days</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="clientSelect">Select Client:</label>
+                        <select id="clientSelect" name="clientSelect" required>
+                            <option value="">Loading clients...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="trialDuration">Trial Duration (hours):</label>
+                        <input type="number" id="trialDuration" name="trialDuration" min="1" max="8760" value="24" required>
                     </div>
                 </div>
-                
                 <div class="form-group">
-                    <label for="trial_type">Trial Type:</label>
-                    <select id="trial_type" name="trial_type">
+                    <label for="trialType">Trial Type:</label>
+                    <select id="trialType" name="trialType">
                         <option value="standard">Standard Trial</option>
                         <option value="demo">Demo Trial</option>
                         <option value="extended">Extended Trial</option>
                         <option value="vip">VIP Trial</option>
                     </select>
                 </div>
-                
-                <button type="submit" class="btn btn-primary" style="width: 100%;">
-                    🚀 Create Trial Account
-                </button>
+                <button type="submit" class="btn">🚀 Create Trial</button>
             </form>
+            <div id="createTrialMessage"></div>
         </div>
-    </div>
 
-    <!-- Extend Trial Modal -->
-    <div id="extendTrialModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Extend Trial</h2>
-                <span class="close" onclick="closeExtendTrialModal()">&times;</span>
-            </div>
-            <form id="extendTrialForm">
-                <input type="hidden" id="extend_client_id" name="client_id">
-                
-                <div class="form-group">
-                    <label for="additional_hours">Additional Hours:</label>
-                    <input type="number" id="additional_hours" name="additional_hours" min="1" max="8760" value="24" required>
-                    
-                    <div class="duration-presets">
-                        <div class="preset-btn" onclick="setExtensionDuration(24)">1 Day</div>
-                        <div class="preset-btn" onclick="setExtensionDuration(72)">3 Days</div>
-                        <div class="preset-btn" onclick="setExtensionDuration(168)">1 Week</div>
-                        <div class="preset-btn" onclick="setExtensionDuration(720)">30 Days</div>
-                    </div>
+        <!-- Active Trials -->
+        <div class="card">
+            <h2>📊 Active Trials</h2>
+            <div id="activeTrialsList" class="trial-list">
+                <div style="text-align: center; padding: 2rem; color: #666;">
+                    Loading trials...
                 </div>
-                
-                <button type="submit" class="btn btn-warning" style="width: 100%;">
-                    ⏰ Extend Trial
-                </button>
-            </form>
+            </div>
+        </div>
+
+        <!-- Trial History -->
+        <div class="card">
+            <h2>📋 Trial History</h2>
+            <div id="trialHistoryList" class="trial-list">
+                <div style="text-align: center; padding: 2rem; color: #666;">
+                    Loading trial history...
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
+        let clients = [];
         let trials = [];
 
-        // Load data on page load
+        // Load initial data
         document.addEventListener('DOMContentLoaded', function() {
+            loadClients();
             loadTrials();
         });
 
-        async function loadTrials() {
-            try {
-                const response = await fetch('/api/trials');
-                const data = await response.json();
-                
-                if (data.error) {
-                    showError(data.error);
-                    return;
-                }
-                
-                trials = data.trials;
-                displayTrials();
-                updateStats();
-                
-            } catch (error) {
-                console.error('Error loading trials:', error);
-                showError('Failed to load trials');
-            }
+        // Create trial form handler
+        document.getElementById('createTrialForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            createTrial();
+        });
+
+        function loadClients() {
+            fetch('/api/clients')
+                .then(response => response.json())
+                .then(data => {
+                    clients = data;
+                    populateClientSelect(data);
+                })
+                .catch(error => {
+                    console.error('Error loading clients:', error);
+                    document.getElementById('clientSelect').innerHTML = '<option value="">Error loading clients</option>';
+                });
         }
 
-        function displayTrials() {
-            const tbody = document.getElementById('trials-tbody');
+        function populateClientSelect(clientsData) {
+            const select = document.getElementById('clientSelect');
             
-            if (trials.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #4a5568; padding: 40px;">No trial accounts found</td></tr>';
+            if (clientsData.length === 0) {
+                select.innerHTML = '<option value="">No clients available</option>';
                 return;
             }
 
-            tbody.innerHTML = '';
-            trials.forEach(trial => {
-                const row = createTrialRow(trial);
-                tbody.appendChild(row);
+            let html = '<option value="">Select a client...</option>';
+            clientsData.forEach(client => {
+                html += `<option value="${client.id}">${client.client_name} (${client.subscription_status})</option>`;
             });
+
+            select.innerHTML = html;
         }
 
-        function createTrialRow(trial) {
-            const row = document.createElement('tr');
-
-            const statusClass = trial.status === 'active' ? 'status-active' : 
-                               trial.status === 'converted' ? 'status-converted' : 'status-expired';
-
-            let timeRemainingText = 'Expired';
-            let timeClass = 'time-expired';
-            
-            if (trial.time_remaining_hours !== null && trial.time_remaining_hours > 0) {
-                if (trial.time_remaining_hours < 24) {
-                    timeRemainingText = `${trial.time_remaining_hours}h`;
-                    timeClass = trial.time_remaining_hours < 6 ? 'time-warning' : 'time-good';
-                } else {
-                    const days = Math.floor(trial.time_remaining_hours / 24);
-                    const hours = trial.time_remaining_hours % 24;
-                    timeRemainingText = `${days}d ${hours}h`;
-                    timeClass = 'time-good';
+        function loadTrials() {
+            // Since we don't have a trials API endpoint yet, we'll simulate data
+            // In a real implementation, this would fetch from /api/trials
+            const mockTrials = [
+                {
+                    id: 1,
+                    client_id: 1,
+                    client_name: 'Demo Client',
+                    trial_type: 'standard',
+                    duration_hours: 24,
+                    start_time: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+                    end_time: new Date(Date.now() + 22 * 60 * 60 * 1000).toISOString(), // 22 hours from now
+                    is_active: true,
+                    converted_to_paid: false
+                },
+                {
+                    id: 2,
+                    client_id: 2,
+                    client_name: 'Test Company',
+                    trial_type: 'extended',
+                    duration_hours: 168,
+                    start_time: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+                    end_time: new Date(Date.now() + 144 * 60 * 60 * 1000).toISOString(), // 6 days from now
+                    is_active: true,
+                    converted_to_paid: false
                 }
+            ];
+
+            trials = mockTrials;
+            displayTrials(mockTrials);
+        }
+
+        function displayTrials(trialsData) {
+            const activeTrials = trialsData.filter(t => t.is_active);
+            const expiredTrials = trialsData.filter(t => !t.is_active);
+
+            displayActiveTrials(activeTrials);
+            displayTrialHistory(expiredTrials);
+        }
+
+        function displayActiveTrials(activeTrials) {
+            const container = document.getElementById('activeTrialsList');
+            
+            if (activeTrials.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">No active trials found.</div>';
+                return;
             }
 
-            row.innerHTML = `
-                <td>
-                    <strong>${trial.business_name}</strong><br>
-                    <small style="color: #4a5568;">${trial.website_url}</small>
-                </td>
-                <td>${trial.contact_email}</td>
-                <td>${trial.trial_duration_hours}h</td>
-                <td>
-                    <span class="time-remaining ${timeClass}">${timeRemainingText}</span>
-                </td>
-                <td>
-                    <span class="status-badge ${statusClass}">
-                        ${trial.status.toUpperCase()}
-                    </span>
-                </td>
-                <td>${trial.extension_count || 0}</td>
-                <td>
-                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                        ${trial.status === 'active' && !trial.is_expired ? `
-                            <button class="btn btn-warning btn-small" onclick="openExtendTrialModal('${trial.client_id}')">
-                                ⏰ Extend
-                            </button>
-                            <button class="btn btn-success btn-small" onclick="convertTrial('${trial.client_id}')">
-                                💰 Convert
-                            </button>
-                            <button class="btn btn-danger btn-small" onclick="restrictTrial('${trial.client_id}')">
-                                🚫 Restrict
-                            </button>
-                        ` : trial.status === 'expired' ? `
-                            <button class="btn btn-warning btn-small" onclick="openExtendTrialModal('${trial.client_id}')">
-                                🔄 Reactivate
-                            </button>
-                            <button class="btn btn-success btn-small" onclick="convertTrial('${trial.client_id}')">
-                                💰 Convert
-                            </button>
-                        ` : `
-                            <span style="color: #4a5568; font-size: 0.8rem;">Converted</span>
-                        `}
+            let html = '';
+            activeTrials.forEach(trial => {
+                const endTime = new Date(trial.end_time);
+                const now = new Date();
+                const timeRemaining = Math.max(0, endTime - now);
+                const hoursRemaining = Math.floor(timeRemaining / (1000 * 60 * 60));
+                const minutesRemaining = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+
+                const isExpiring = hoursRemaining < 24;
+                const statusClass = isExpiring ? 'status-expiring' : 'status-active';
+                const statusText = isExpiring ? 'Expiring Soon' : 'Active';
+
+                html += `
+                    <div class="trial-item">
+                        <div class="trial-info">
+                            <h4>${trial.client_name}</h4>
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                            <p><strong>Type:</strong> ${trial.trial_type.charAt(0).toUpperCase() + trial.trial_type.slice(1)} Trial</p>
+                            <p><strong>Duration:</strong> ${trial.duration_hours} hours</p>
+                            <p><strong>Started:</strong> ${new Date(trial.start_time).toLocaleString()}</p>
+                            <p><strong>Ends:</strong> ${endTime.toLocaleString()}</p>
+                            <p class="time-remaining"><strong>Time Remaining:</strong> ${hoursRemaining}h ${minutesRemaining}m</p>
+                        </div>
+                        <div class="trial-actions">
+                            <button class="btn" onclick="extendTrial(${trial.id})">⏰ Extend</button>
+                            <button class="btn btn-success" onclick="convertTrial(${trial.id})">💰 Convert to Paid</button>
+                            <button class="btn btn-danger" onclick="endTrial(${trial.id})">❌ End Trial</button>
+                            <a href="/client/${trial.client_id}" target="_blank" class="btn">🔗 View Dashboard</a>
+                        </div>
                     </div>
-                </td>
-            `;
-
-            return row;
-        }
-
-        function updateStats() {
-            const activeTrials = trials.filter(t => t.status === 'active' && !t.is_expired).length;
-            const expiredTrials = trials.filter(t => t.is_expired || t.status === 'expired').length;
-            const convertedTrials = trials.filter(t => t.status === 'converted').length;
-            const expiringToday = trials.filter(t => t.time_remaining_hours !== null && t.time_remaining_hours <= 24 && t.time_remaining_hours > 0).length;
-
-            const statsGrid = document.getElementById('stats-grid');
-            statsGrid.innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-number" style="color: #38a169;">${activeTrials}</div>
-                    <div class="stat-label">Active Trials</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" style="color: #dd6b20;">${expiringToday}</div>
-                    <div class="stat-label">Expiring Today</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" style="color: #e53e3e;">${expiredTrials}</div>
-                    <div class="stat-label">Expired Trials</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" style="color: #3182ce;">${convertedTrials}</div>
-                    <div class="stat-label">Converted</div>
-                </div>
-            `;
-        }
-
-        function openCreateTrialModal() {
-            document.getElementById('createTrialModal').style.display = 'block';
-        }
-
-        function closeCreateTrialModal() {
-            document.getElementById('createTrialModal').style.display = 'none';
-            document.getElementById('createTrialForm').reset();
-        }
-
-        function openExtendTrialModal(clientId) {
-            document.getElementById('extend_client_id').value = clientId;
-            document.getElementById('extendTrialModal').style.display = 'block';
-        }
-
-        function closeExtendTrialModal() {
-            document.getElementById('extendTrialModal').style.display = 'none';
-            document.getElementById('extendTrialForm').reset();
-        }
-
-        function setDuration(hours) {
-            document.getElementById('duration_hours').value = hours;
-            
-            // Update active state
-            document.querySelectorAll('.duration-presets .preset-btn').forEach(btn => {
-                btn.classList.remove('active');
+                `;
             });
-            event.target.classList.add('active');
+
+            container.innerHTML = html;
         }
 
-        function setExtensionDuration(hours) {
-            document.getElementById('additional_hours').value = hours;
+        function displayTrialHistory(expiredTrials) {
+            const container = document.getElementById('trialHistoryList');
             
-            // Update active state
-            document.querySelectorAll('#extendTrialModal .duration-presets .preset-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-        }
-
-        async function createTrial(event) {
-            event.preventDefault();
-            
-            const formData = new FormData(event.target);
-            const trialData = {
-                business_name: formData.get('business_name'),
-                contact_email: formData.get('contact_email'),
-                website_url: formData.get('website_url'),
-                duration_hours: parseInt(formData.get('duration_hours')),
-                trial_type: formData.get('trial_type'),
-                granted_by: 'admin'
-            };
-
-            try {
-                const response = await fetch('/api/create-trial', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(trialData)
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showSuccess(`Trial created successfully! Dashboard URL: ${result.dashboard_url}`);
-                    closeCreateTrialModal();
-                    loadTrials();
-                } else {
-                    showError(result.error || 'Failed to create trial');
-                }
-            } catch (error) {
-                console.error('Error creating trial:', error);
-                showError('Failed to create trial');
-            }
-        }
-
-        async function extendTrial(event) {
-            event.preventDefault();
-            
-            const formData = new FormData(event.target);
-            const clientId = formData.get('client_id');
-            const additionalHours = parseInt(formData.get('additional_hours'));
-
-            try {
-                const response = await fetch(`/api/extend-trial/${clientId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        additional_hours: additionalHours,
-                        extended_by: 'admin'
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showSuccess(`Trial extended successfully by ${additionalHours} hours!`);
-                    closeExtendTrialModal();
-                    loadTrials();
-                } else {
-                    showError(result.error || 'Failed to extend trial');
-                }
-            } catch (error) {
-                console.error('Error extending trial:', error);
-                showError('Failed to extend trial');
-            }
-        }
-
-        async function convertTrial(clientId) {
-            if (!confirm('Convert this trial to a full paid account?')) {
+            if (expiredTrials.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">No trial history found.</div>';
                 return;
             }
 
-            try {
-                const response = await fetch(`/api/convert-trial/${clientId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        plan_type: 'basic'
-                    })
-                });
+            let html = '';
+            expiredTrials.forEach(trial => {
+                const statusClass = trial.converted_to_paid ? 'status-active' : 'status-expired';
+                const statusText = trial.converted_to_paid ? 'Converted' : 'Expired';
 
-                const result = await response.json();
+                html += `
+                    <div class="trial-item">
+                        <div class="trial-info">
+                            <h4>${trial.client_name}</h4>
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                            <p><strong>Type:</strong> ${trial.trial_type.charAt(0).toUpperCase() + trial.trial_type.slice(1)} Trial</p>
+                            <p><strong>Duration:</strong> ${trial.duration_hours} hours</p>
+                            <p><strong>Period:</strong> ${new Date(trial.start_time).toLocaleDateString()} - ${new Date(trial.end_time).toLocaleDateString()}</p>
+                        </div>
+                        <div class="trial-actions">
+                            ${!trial.converted_to_paid ? 
+                                `<button class="btn" onclick="reactivateTrial(${trial.id})">🔄 Reactivate</button>` : 
+                                `<span style="color: #27ae60; font-weight: bold;">✅ Converted</span>`
+                            }
+                        </div>
+                    </div>
+                `;
+            });
 
-                if (result.success) {
-                    showSuccess('Trial converted to full account successfully!');
-                    loadTrials();
-                } else {
-                    showError(result.error || 'Failed to convert trial');
-                }
-            } catch (error) {
-                console.error('Error converting trial:', error);
-                showError('Failed to convert trial');
-            }
+            container.innerHTML = html;
         }
 
-        async function restrictTrial(clientId) {
-            if (!confirm('Manually restrict this trial account? This will immediately block access.')) {
+        function showCreateTrialForm(hours) {
+            document.getElementById('trialDuration').value = hours;
+            document.getElementById('trialDuration').focus();
+        }
+
+        function createTrial() {
+            const clientId = document.getElementById('clientSelect').value;
+            const duration = document.getElementById('trialDuration').value;
+            const trialType = document.getElementById('trialType').value;
+            const messageDiv = document.getElementById('createTrialMessage');
+            
+            if (!clientId) {
+                showMessage(messageDiv, 'Please select a client', 'error');
                 return;
             }
 
-            try {
-                const response = await fetch(`/api/restrict-trial/${clientId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+            if (!duration || duration < 1) {
+                showMessage(messageDiv, 'Please enter a valid duration', 'error');
+                return;
+            }
 
-                const result = await response.json();
-
-                if (result.success) {
-                    showSuccess('Trial access restricted successfully!');
-                    loadTrials();
+            fetch('/api/trials', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    client_id: parseInt(clientId),
+                    duration_hours: parseInt(duration),
+                    trial_type: trialType
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showMessage(messageDiv, `Trial created successfully! Duration: ${duration} hours`, 'success');
+                    document.getElementById('createTrialForm').reset();
+                    loadTrials(); // Refresh trial list
                 } else {
-                    showError(result.error || 'Failed to restrict trial');
+                    showMessage(messageDiv, 'Error creating trial: ' + data.error, 'error');
                 }
-            } catch (error) {
-                console.error('Error restricting trial:', error);
-                showError('Failed to restrict trial');
-            }
+            })
+            .catch(error => {
+                showMessage(messageDiv, 'Error creating trial: ' + error.message, 'error');
+            });
         }
 
-        function showSuccess(message) {
-            const notification = document.createElement('div');
-            notification.className = 'success-message';
-            notification.textContent = message;
+        function extendTrial(trialId) {
+            const hours = prompt('Enter additional hours to extend the trial:', '24');
+            if (!hours || isNaN(hours)) return;
+
+            alert(`Trial extension feature will be implemented. Adding ${hours} hours to trial ${trialId}.`);
+            // Implementation for extending trial
+        }
+
+        function convertTrial(trialId) {
+            if (!confirm('Convert this trial to a paid subscription?')) return;
             
-            const mainContent = document.querySelector('.main-content');
-            mainContent.insertBefore(notification, mainContent.firstChild);
-
-            setTimeout(() => notification.remove(), 5000);
+            alert('Trial conversion feature will be implemented');
+            // Implementation for converting trial to paid
         }
 
-        function showError(message) {
-            const notification = document.createElement('div');
-            notification.className = 'error-message';
-            notification.textContent = message;
+        function endTrial(trialId) {
+            if (!confirm('Are you sure you want to end this trial immediately?')) return;
             
-            const mainContent = document.querySelector('.main-content');
-            mainContent.insertBefore(notification, mainContent.firstChild);
-
-            setTimeout(() => notification.remove(), 5000);
+            alert('End trial feature will be implemented');
+            // Implementation for ending trial
         }
 
-        // Attach form submit handlers
-        document.getElementById('createTrialForm').addEventListener('submit', createTrial);
-        document.getElementById('extendTrialForm').addEventListener('submit', extendTrial);
-
-        // Close modals when clicking outside
-        window.onclick = function(event) {
-            const createModal = document.getElementById('createTrialModal');
-            const extendModal = document.getElementById('extendTrialModal');
+        function reactivateTrial(trialId) {
+            if (!confirm('Reactivate this expired trial?')) return;
             
-            if (event.target === createModal) {
-                closeCreateTrialModal();
-            }
-            if (event.target === extendModal) {
-                closeExtendTrialModal();
-            }
+            alert('Trial reactivation feature will be implemented');
+            // Implementation for reactivating trial
         }
 
-        // Auto-refresh every 5 minutes
-        setInterval(loadTrials, 300000);
+        function showMessage(container, message, type) {
+            const className = type === 'success' ? 'success-message' : 'error-message';
+            container.innerHTML = `<div class="${className}">${message}</div>`;
+            
+            // Clear message after 5 seconds
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+
+        // Auto-refresh every 60 seconds
+        setInterval(() => {
+            loadTrials();
+        }, 60000);
+
+        // Update time remaining every minute
+        setInterval(() => {
+            const timeElements = document.querySelectorAll('.time-remaining');
+            timeElements.forEach(element => {
+                // Update time remaining display
+                // This would need to be implemented with proper time calculation
+            });
+        }, 60000);
     </script>
 </body>
 </html>
