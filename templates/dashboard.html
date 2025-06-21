@@ -169,6 +169,11 @@
             gap: 8px;
         }
 
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
         .investigation-form {
             display: grid;
             gap: 1.5rem;
@@ -208,13 +213,6 @@
 
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
-        }
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
         }
 
         .btn-success {
@@ -539,7 +537,7 @@
                         </select>
                     </div>
                     <div class="form-actions">
-                        <button class="btn btn-primary" onclick="startInvestigation()">🚀 Start Investigation</button>
+                        <button class="btn btn-primary" onclick="startInvestigation( )">🚀 Start Investigation</button>
                     </div>
                 </div>
             </div>
@@ -573,12 +571,12 @@
                     </div>
                 </div>
 
-                <div id="loading" class="loading">
+                <div id="loading" class="loading" style="display: none;">
                     <div class="loading-spinner"></div>
-                    <p>Loading visitor intelligence...</p>
+                    <p>Investigating website visitors...</p>
                 </div>
 
-                <div id="visitors-container" style="display: none;">
+                <div id="visitors-container">
                     <div id="visitors-grid" class="visitors-grid"></div>
                 </div>
             </div>
@@ -639,10 +637,14 @@
         async function loadVisitors() {
             try {
                 const response = await fetch('/api/visitors');
-                const data = await response.json();
-                visitors = data;
-                displayVisitors();
-                updateStats();
+                if (response.ok) {
+                    const data = await response.json();
+                    visitors = data;
+                    displayVisitors();
+                    updateStats();
+                } else {
+                    console.error('Failed to load visitors:', response.status);
+                }
             } catch (error) {
                 console.error('Error loading visitors:', error);
             }
@@ -650,21 +652,21 @@
 
         // Display visitors with comprehensive information
         function displayVisitors() {
-            const loading = document.getElementById('loading');
             const container = document.getElementById('visitors-container');
             const grid = document.getElementById('visitors-grid');
 
-            loading.style.display = 'none';
-            containe                if (visitors.length === 0) {
-                    grid.innerHTML = `
-                        <div class="no-data">
-                            <h3>No Visitors Found</h3>
-                            <p>Enter a website URL above and click "Start Investigation" to see real visitor data.</p>
-                        </div>
-                    `;
-                    return;
-                }      grid.innerHTML = '';
-            visitors.forEach(visitor => {
+            if (visitors.length === 0) {
+                grid.innerHTML = `
+                    <div class="no-data">
+                        <h3>No Visitors Found</h3>
+                        <p>Enter a website URL above and click "Start Investigation" to see real visitor data.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = '';
+            visitors.slice(0, 20).forEach(visitor => {
                 const card = createVisitorCard(visitor);
                 grid.appendChild(card);
             });
@@ -799,7 +801,7 @@
             
             // Show loading
             document.getElementById('loading').style.display = 'block';
-            document.getElementById('visitors-container').style.display = 'none';
+            document.getElementById('visitors-grid').innerHTML = '';
             
             try {
                 const response = await fetch('/api/investigate', {
@@ -817,7 +819,10 @@
                 
                 if (result.status === 'success') {
                     // Load the investigation results
-                    loadVisitors();
+                    setTimeout(() => {
+                        loadVisitors();
+                        document.getElementById('loading').style.display = 'none';
+                    }, 2000);
                 } else {
                     alert('Investigation failed: ' + result.message);
                     document.getElementById('loading').style.display = 'none';
@@ -827,12 +832,6 @@
                 alert('Error starting investigation. Please try again.');
                 document.getElementById('loading').style.display = 'none';
             }
-        }
-
-        // Generate demo data
-        async function generateDemoData() {
-            // Removed - This system only works with real visitor data
-            alert('This system only tracks real visitors. Please use "Start Investigation" with a real website URL.');
         }
 
         // Auto-refresh every 30 seconds
@@ -852,10 +851,7 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             loadVisitors();
-            // Auto-refresh every 30 seconds
-            setInterval(loadVisitors, 30000);
         });
     </script>
 </body>
 </html>
-
