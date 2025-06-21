@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_from_directory
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_file
 from flask_cors import CORS
 import sqlite3
 import hashlib
@@ -15,9 +15,6 @@ import os
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 CORS(app)
-
-# Create static directory for logo files
-os.makedirs('static', exist_ok=True)
 
 # Database setup
 def init_db():
@@ -386,9 +383,14 @@ init_db()
 # Initialize real visitor tracker
 real_tracker = RealVisitorTracker()
 
-@app.route('/static/<filename>')
-def static_files(filename):
-    return send_from_directory('static', filename)
+# Serve logo files from root directory
+@app.route('/logo.png')
+def serve_logo():
+    return send_file('logo.png', mimetype='image/png')
+
+@app.route('/favicon.png')
+def serve_favicon():
+    return send_file('favicon.png', mimetype='image/png')
 
 @app.route('/')
 def index():
